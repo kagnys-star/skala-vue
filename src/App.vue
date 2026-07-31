@@ -1,12 +1,12 @@
 <script setup>
-import SampleOne from './sampleOne.vue'
-import SampleTwo from './sampleTwo.vue'
+import WeatherMockup from './WeatherMockup.vue'
+import sampleOne from './sampleOne.vue'
 </script>
 
 <template>
   <div class="app">
-    <SampleOne />
-    <SampleTwo />
+    <WeatherMockup />
+    <sampleOne />
   </div>
 </template>
 
