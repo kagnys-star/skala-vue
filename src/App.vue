@@ -6,7 +6,7 @@ import sampleOne from './sampleOne.vue'
 <template>
   <div class="app">
     <WeatherMockup />
-    <sampleOne />
+    <!--<sampleOne />-->
   </div>
 </template>
 

@@ -1,11 +1,11 @@
 <script setup>
 import { ref } from 'vue'
 
-// 1) 배열 렌더링용 날씨 데이터
+// 1) 배열 렌더링용 날씨 데이터 (humidity: 습도 %, wind: 풍속 m/s, bookmarked: 북마크 여부)
 const weatherList = ref([
-  { id: 'city_01', name: '서울', temp: 28, status: '맑음' },
-  { id: 'city_02', name: '수원', temp: 24, status: '비' },
-  { id: 'city_03', name: '부산', temp: 26, status: '구름' },
+  { id: 'city_01', name: '서울', temp: 28, status: '맑음', humidity: 55, wind: 2.5, bookmarked: false },
+  { id: 'city_02', name: '수원', temp: 24, status: '비', humidity: 80, wind: 1.8, bookmarked: false },
+  { id: 'city_03', name: '부산', temp: 26, status: '구름', humidity: 65, wind: 3.2, bookmarked: false },
 ])
 
 // 3) 양방향 바인딩(한글 처리)용 검색어
@@ -16,12 +16,19 @@ const statusMessage = ref('카드를 클릭하거나 검색해 보세요.')
 
 // 카드 선택 (버블링으로 상세보기 버튼과 구분 필요)
 const selectCard = (cityName) => {
-  statusMessage.value = `${cityName}가 선택되었습니다.`
+  statusMessage.value = `${cityName}가(이) 선택되었습니다.`
 }
 
 // 상세보기 버튼 (버블링 없이 alert)
 const showDetail = (cityName, status) => {
   window.alert(`${cityName}의 현재 날씨는 [${status}] 상태입니다.`)
+}
+
+// 북마크 체크박스 (v-model로 값이 바뀐 뒤 상태바 문구 갱신)
+const toggleBookmark = (city) => {
+  statusMessage.value = city.bookmarked
+    ? `${city.name}을(를) 북마크에 추가했습니다. ⭐`
+    : `${city.name}을(를) 북마크에서 해제했습니다.`
 }
 </script>
 
@@ -52,18 +59,32 @@ const showDetail = (cityName, status) => {
         @click="selectCard(city.name)"
       >
         <div class="card-info">
-          <p class="city-name">{{ city.name }} ({{ city.status }})</p>
+          <p class="city-name">
+            {{ city.name }} ({{ city.status }})
+            <span v-show="city.bookmarked" class="star">⭐</span>
+          </p>
           <p class="city-temp">현재 기온: {{ city.temp }}°C</p>
+          <!-- 추가 데이터 필드 표시 -->
+          <p class="city-detail">습도: {{ city.humidity }}% / 풍속: {{ city.wind }}m/s</p>
 
-          <!-- 2) 조건부 렌더링 (v-if / v-else) -->
-          <span v-if="city.temp >= 25" class="badge badge-hot">🔥 더움 (25도 이상)</span>
+          <!-- 2) 조건부 렌더링 (v-if / v-else-if / v-else 3단 분기) -->
+          <span v-if="city.temp >= 28" class="badge badge-very-hot">🔥 무더움 (28도 이상)</span>
+          <span v-else-if="city.temp >= 25" class="badge badge-hot">🌡 더움 (25도 이상)</span>
           <span v-else class="badge badge-cool">❄ 선선함 (25도 미만)</span>
         </div>
 
-        <!-- 4) 이벤트 수식어 .stop 으로 카드 클릭 버블링 차단 -->
-        <button class="detail-btn" @click.stop="showDetail(city.name, city.status)">
-          상세보기
-        </button>
+        <div class="card-actions">
+          <!-- 4) 이벤트 수식어 .stop 으로 카드 클릭 버블링 차단 -->
+          <button class="detail-btn" @click.stop="showDetail(city.name, city.status)">
+            상세보기
+          </button>
+
+          <!-- 체크박스 v-model 양방향 바인딩 + .stop 으로 카드 선택 방지 -->
+          <label class="bookmark-label" @click.stop>
+            <input type="checkbox" v-model="city.bookmarked" @change="toggleBookmark(city)" />
+            북마크
+          </label>
+        </div>
       </div>
     </section>
 
@@ -143,9 +164,39 @@ const showDetail = (cityName, status) => {
 }
 
 .city-temp {
-  margin: 0 0 8px;
+  margin: 0 0 2px;
   font-size: 13px;
   color: #606266;
+}
+
+.city-detail {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.star {
+  font-size: 12px;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.bookmark-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #606266;
+  cursor: pointer;
+}
+
+.bookmark-label input {
+  cursor: pointer;
 }
 
 .badge {
@@ -156,8 +207,12 @@ const showDetail = (cityName, status) => {
   color: #ffffff;
 }
 
-.badge-hot {
+.badge-very-hot {
   background-color: #f56c6c;
+}
+
+.badge-hot {
+  background-color: #e6a23c;
 }
 
 .badge-cool {
