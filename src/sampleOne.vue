@@ -1,32 +1,27 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
-const count = ref(0)
-const dummy = ref(0) // computed와 무관한 변수
-
-// 1. 일반 함수: 화면이 조금이라도 리렌더링되면 무조건 재실행
-const getMethodResult = () => {
-  console.log('❌ 일반 함수 실행됨!')
-  return count.value * 2
-}
-
-// 2. Computed: count가 바뀔 때만 재연산 (dummy가 바뀔 땐 이전 값 재사용)
-const doubleCount = computed(() => {
-  console.log('✅ Computed 연산 실행됨!')
-  return count.value * 2
-})
+// 하위 컴포넌트 내부에서 관리하는 2개의 서로 다른 기본형 데이터
+const message = ref('현재 서버 상태 정상')
+const userCount = ref(150)
 </script>
 
 <template>
-  <div class="practice-section">
-    <h2>computed() 캐싱 동작 비교</h2>
-
-    <p>count: {{ count }} | dummy: {{ dummy }}</p>
-    <button @click="count++">count 증가 (의존성 변경)</button>
-    <button @click="dummy++">dummy 증가 (무관한 변경)</button>
-
-    <!-- dummy 버튼을 누를 때 콘솔 출력 차이를 확인 -->
-    <p>일반 함수 결과: {{ getMethodResult() }}</p>
-    <p>Computed 결과: {{ doubleCount }}</p>
+  <div class="base-card">
+    <h3>하위 컴포넌트 (Child)</h3>
+    <slot :text="message" :count="userCount">
+      <p>부모가 마크업을 주입하지 않았을 때의 디폴트 화면</p>
+    </slot>
   </div>
 </template>
+
+<style scoped>
+.base-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+</style>

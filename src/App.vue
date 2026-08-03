@@ -1,14 +1,12 @@
 <script setup>
-import WeatherMockup from './WeatherMockup.vue'
-import WeatherComposition from './WeatherComposition.vue'
-import sampleOne from './sampleOne.vue'
+import WeatherParent from './WeatherParent.vue'
+import sampleTwo from '@/sampleTwo.vue'
 </script>
 
 <template>
   <div class="app">
-    <!-- <WeatherMockup /> -->
-    <WeatherComposition />
-    <!-- <sampleOne /> -->
+    <WeatherParent />
+    <!-- <sampleTwo /> -->
   </div>
 </template>
 
