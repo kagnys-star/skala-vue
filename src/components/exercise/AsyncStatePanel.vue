@@ -58,47 +58,47 @@ defineEmits(['retry'])
 
 <style scoped>
 .state-panel {
-  padding: 24px 16px;
-  border-radius: 6px;
+  padding: 34px 20px;
+  border-radius: var(--radius);
   text-align: center;
 }
 
 .state-loading {
-  background-color: #f7f9fc;
-  border: 1px solid #e4e7ed;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
 }
 
 .state-error {
-  background-color: #fef0f0;
-  border: 1px solid #fde2e2;
+  background-color: #fdf2f2;
+  border: 1px solid #f8dcdc;
 }
 
 .state-title {
   margin: 0 0 6px;
-  font-size: 13px;
-  font-weight: bold;
-  color: #f56c6c;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--hot);
 }
 
 .state-text {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--fs-md);
   line-height: 1.7;
-  color: #909399;
+  color: var(--text-muted);
 }
 
 .state-error .state-text {
-  color: #f56c6c;
+  color: var(--hot);
 }
 
 /* 테두리 한 변만 색을 넣고 회전시켜 만드는 로딩 스피너 */
 .spinner {
   display: inline-block;
-  width: 22px;
-  height: 22px;
-  margin-bottom: 10px;
-  border: 2px solid #e4e7ed;
-  border-top-color: #409eff;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 12px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -110,18 +110,20 @@ defineEmits(['retry'])
 }
 
 .retry-btn {
-  margin-top: 12px;
-  padding: 6px 16px;
-  background-color: #ffffff;
-  border: 1px solid #f56c6c;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #f56c6c;
+  margin-top: 14px;
+  padding: 8px 20px;
+  background-color: var(--surface);
+  border: 1px solid var(--hot);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--hot);
   cursor: pointer;
+  transition: all var(--ease);
 }
 
 .retry-btn:hover {
-  background-color: #f56c6c;
+  background-color: var(--hot);
   color: #ffffff;
 }
 </style>

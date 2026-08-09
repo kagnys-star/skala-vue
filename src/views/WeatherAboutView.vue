@@ -40,52 +40,59 @@ import { RouterLink } from 'vue-router'
 
 <style scoped>
 .about-view {
-  padding: 12px;
-  background-color: #f7f9fc;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
+  padding: 22px;
+  background-color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
 }
 
 .about-title {
-  margin: 0 0 12px;
-  font-size: 14px;
-  color: #409eff;
+  margin: 0 0 14px;
+  font-size: var(--fs-lg);
+  font-weight: 700;
 }
 
 .about-lead {
-  margin: 0 0 10px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #303133;
+  margin: 0 0 16px;
+  font-size: var(--fs-base);
+  line-height: 1.7;
+  color: var(--text-soft);
 }
 
 .about-list {
-  margin: 0 0 14px;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.9;
-  color: #606266;
+  margin: 0 0 20px;
+  padding-left: 20px;
+  font-size: var(--fs-md);
+  line-height: 2;
+  color: var(--text-soft);
 }
 
 .about-list code {
-  padding: 1px 4px;
-  background-color: #fdf6ec;
-  border-radius: 3px;
-  color: #e6a23c;
+  padding: 2px 6px;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: var(--fs-sm);
+  color: var(--accent);
 }
 
 .home-link {
   display: block;
-  padding: 9px;
-  background-color: #409eff;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 13px;
+  background-color: var(--accent);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  font-weight: 600;
   color: #ffffff;
   text-align: center;
   text-decoration: none;
+  transition: all var(--ease);
 }
 
 .home-link:hover {
-  background-color: #66b1ff;
+  background-color: var(--accent-hover);
+  box-shadow: var(--shadow);
 }
 </style>

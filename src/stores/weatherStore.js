@@ -28,6 +28,13 @@ export const useWeatherStore = defineStore('weather', () => {
     return (cityId) => weatherList.value.find((city) => city.id === cityId) ?? null
   })
 
+  /**
+   * 지금이 밤인지 여부.
+   * OpenWeatherMap 아이콘 코드는 끝 글자로 낮(d)과 밤(n)을 구분한다.
+   * 이 값으로 배경 하늘색을 바꾼다. 별도 호출 없이 이미 받은 데이터만 쓴다.
+   */
+  const isNight = computed(() => weatherList.value[0]?.icon?.endsWith('n') ?? false)
+
   // ---- actions ----
   /**
    * 카탈로그의 모든 도시 날씨를 받아온다.
@@ -104,6 +111,7 @@ export const useWeatherStore = defineStore('weather', () => {
     lastLoadedAt,
     hasData,
     findCityById,
+    isNight,
     loadWeather,
     ensureLoaded,
   }

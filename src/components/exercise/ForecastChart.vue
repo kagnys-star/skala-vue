@@ -110,28 +110,30 @@ const formatDay = (time) => time.toLocaleDateString('ko-KR', { month: 'numeric',
 }
 
 .slot-day {
-  height: 13px;
-  font-size: 10px;
-  font-weight: bold;
-  color: #409eff;
+  height: 14px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--accent);
 }
 
 .slot-temp {
-  font-size: 11px;
-  font-weight: bold;
-  color: #303133;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
 }
 
 .bar-track {
   display: flex;
   align-items: flex-end;
-  height: 56px;
+  height: 64px;
 }
 
 .bar-fill {
-  width: 10px;
-  background: linear-gradient(to top, #409eff, #79bbff);
-  border-radius: 3px 3px 0 0;
+  width: 12px;
+  background: linear-gradient(to top, var(--accent), #93b8f5);
+  border-radius: 6px 6px 0 0;
+  transition: height var(--ease);
 }
 
 .slot-icon {
@@ -140,8 +142,9 @@ const formatDay = (time) => time.toLocaleDateString('ko-KR', { month: 'numeric',
 }
 
 .slot-pop {
-  font-size: 10px;
-  color: #409eff;
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--cool);
 }
 
 /* 자리는 유지하고 보이지만 않게 한다. display:none으로 지우면 칸마다 높이가 달라져 줄이 어긋난다. */
@@ -150,7 +153,7 @@ const formatDay = (time) => time.toLocaleDateString('ko-KR', { month: 'numeric',
 }
 
 .slot-hour {
-  font-size: 10px;
-  color: #909399;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
 }
 </style>

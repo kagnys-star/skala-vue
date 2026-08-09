@@ -53,7 +53,7 @@ const toggleBookmark = (city) => {
 
       <div
         v-if="!weatherStore.isLoading && !weatherStore.errorMessage && bookmarkStore.bookmarkCount > 0"
-        class="card-list"
+        class="card-list scroll-area"
       >
         <WeatherCard
           v-for="city in bookmarkStore.bookmarkedCities"
@@ -86,50 +86,63 @@ const toggleBookmark = (city) => {
 </template>
 
 <style scoped>
+.bookmark-view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 /* #header 슬롯 내용은 부모(이 컴포넌트) 스코프에서 컴파일되므로 여기서 스타일을 정의한다 */
 .slot-card-title {
   margin: 0;
-  font-size: 14px;
-  color: #409eff;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 
 .count-badge {
-  padding: 2px 8px;
-  background-color: #ecf5ff;
-  border-radius: 10px;
-  font-size: 11px;
-  color: #409eff;
+  padding: 3px 10px;
+  background-color: var(--accent-soft);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--accent);
 }
 
+/* 대시보드와 같은 격자 규칙을 쓴다. 두 화면의 카드 크기가 저절로 맞는다. */
 .card-list {
-  max-height: 380px;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  max-height: 560px;
+  padding-right: 4px;
 }
 
 .empty-result {
   margin: 0;
-  padding: 24px 16px;
-  background-color: #fdf6ec;
-  border: 1px solid #faecd8;
-  border-radius: 4px;
-  font-size: 13px;
-  line-height: 1.8;
-  color: #e6a23c;
+  padding: 44px 16px;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  line-height: 1.9;
+  color: var(--text-muted);
   text-align: center;
 }
 
 .empty-result a {
-  color: #409eff;
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .status-bar {
   margin: 0;
-  padding: 10px;
-  background-color: #f0f9eb;
-  border: 1px solid #e1f3d8;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #67c23a;
+  padding: 11px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  color: var(--text-soft);
   text-align: center;
+  backdrop-filter: blur(8px);
 }
 </style>

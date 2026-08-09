@@ -71,19 +71,26 @@ onMounted(() => airStore.ensureLoaded())
 </template>
 
 <style scoped>
+.air-view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 /* #header 슬롯 내용은 부모 스코프에서 컴파일되므로 여기서 스타일을 정의한다 */
 .slot-card-title {
   margin: 0;
-  font-size: 14px;
-  color: #409eff;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 
 .count-badge {
-  padding: 2px 8px;
-  background-color: #ecf5ff;
-  border-radius: 10px;
-  font-size: 11px;
-  color: #409eff;
+  padding: 3px 10px;
+  background-color: var(--accent-soft);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .air-list {
@@ -94,13 +101,19 @@ onMounted(() => airStore.ensureLoaded())
 
 .air-row {
   display: flex;
+  gap: 10px;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding: 8px 10px;
-  background-color: #ffffff;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: all var(--ease);
+}
+
+.air-row:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .air-row:last-child {
@@ -108,52 +121,61 @@ onMounted(() => airStore.ensureLoaded())
 }
 
 .air-rank {
-  width: 18px;
-  font-size: 12px;
-  font-weight: bold;
-  color: #909399;
+  width: 24px;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
   text-align: center;
 }
 
 .air-name {
-  width: 42px;
-  font-size: 13px;
-  font-weight: bold;
+  width: 48px;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 
 .air-badge {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
   color: #ffffff;
+  white-space: nowrap;
 }
 
 .air-detail {
   margin-left: auto;
-  font-size: 11px;
-  color: #606266;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-soft);
+  text-align: right;
 }
 
 .air-unit {
-  color: #c0c4cc;
+  color: var(--text-muted);
 }
 
 .partial-warning {
-  margin: 10px 0 0;
-  padding: 8px;
-  background-color: #fdf6ec;
-  border: 1px solid #faecd8;
-  border-radius: 4px;
-  font-size: 11px;
-  color: #e6a23c;
+  margin: 12px 0 0;
+  padding: 10px;
+  background-color: #fdf6ea;
+  border: 1px solid #f6e4c8;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--warm);
   text-align: center;
 }
 
 .air-note {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   line-height: 1.6;
-  color: #909399;
+  color: var(--text-muted);
   text-align: center;
+}
+
+.is-night .air-note {
+  color: rgba(255, 255, 255, 0.55);
 }
 </style>

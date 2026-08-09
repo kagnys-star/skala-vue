@@ -1,0 +1,124 @@
+/**
+ * 전역 스타일 · 디자인 토큰.
+ *
+ * 컴포넌트마다 색상 코드와 여백 값을 직접 적으면, 나중에 톤을 바꿀 때 파일을 전부 뒤져야 하고
+ * 그러다 한두 군데를 빠뜨려 화면이 미묘하게 어긋난다.
+ * 그래서 '결정'은 여기 변수로 모아두고, 각 컴포넌트는 변수만 참조한다.
+ */
+
+:root {
+  /* ---- 색: 배경 ---- */
+  --sky-top: #cfe4ff;
+  --sky-bottom: #eef4fb;
+
+  /* ---- 색: 표면(카드) ---- */
+  --surface: #ffffff;
+  --surface-sunken: #f6f8fc;
+  --border: #e4eaf2;
+  --border-strong: #cfd9e6;
+
+  /* ---- 색: 글자 ---- */
+  --text: #0f1b2d;
+  --text-soft: #4a5a70;
+  --text-muted: #8b9bb0;
+
+  /* ---- 색: 강조 ---- */
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: #eaf2ff;
+
+  /* ---- 색: 의미 ---- */
+  --hot: #e5484d;
+  --warm: #e08c1a;
+  --cool: #2f8fd8;
+  --good: #23a06b;
+  --severe: #8f2d32;
+
+  /* ---- 형태 ---- */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+
+  /* 그림자는 '떠 있는 높이'를 뜻한다. 값이 클수록 위에 떠 있는 요소다. */
+  --shadow-sm: 0 1px 2px rgba(16, 32, 56, 0.06);
+  --shadow: 0 6px 20px -6px rgba(16, 32, 56, 0.14);
+  --shadow-lg: 0 20px 40px -16px rgba(16, 32, 56, 0.28);
+
+  /* ---- 글자 크기 ---- */
+  --fs-xs: 0.6875rem;
+  --fs-sm: 0.75rem;
+  --fs-md: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-display: 3.25rem;
+
+  --ease: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 밤에는 배경만 어둡게 바꾼다. 카드는 그대로 흰색이라 가독성이 유지된다. */
+.is-night {
+  --sky-top: #1c2b45;
+  --sky-bottom: #33455f;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  /* 한글이 가장 깔끔하게 나오는 순서로 쌓는다. 시스템 폰트라 로딩 지연이 없다. */
+  font-family:
+    'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', 'Apple SD Gothic Neo',
+    system-ui, sans-serif;
+  font-size: var(--fs-base);
+  line-height: 1.55;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 숫자를 등폭으로 렌더링한다. 기온이 9°C ↔ 10°C로 바뀔 때 옆 글자가 밀리지 않는다. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* 키보드로 이동할 때만 초점 테두리를 보여준다. 마우스 클릭 시에는 나오지 않는다. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 목록 스크롤 영역의 스크롤바를 얇게 다듬는다 */
+.scroll-area {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-area::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 3px;
+}
+
+/* 움직임을 불편해하는 사용자를 위해 애니메이션을 최소화한다 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

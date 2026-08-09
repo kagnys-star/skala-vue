@@ -54,16 +54,22 @@ const selectSuggestion = (cityName) => {
 
 <template>
   <div class="search-box">
-    <input
-      class="search-input"
-      type="text"
-      placeholder="검색할 도시 이름 입력"
-      :value="query"
-      @input="handleInput"
-      @focus="isOpen = true"
-      @blur="isOpen = false"
-      @keyup.esc="isOpen = false"
-    >
+    <div class="input-wrap">
+      <span
+        class="input-icon"
+        aria-hidden="true"
+      >🔍</span>
+      <input
+        class="search-input"
+        type="search"
+        placeholder="도시 이름을 입력하세요 (예: 부산, ㅂㅅ)"
+        :value="query"
+        @input="handleInput"
+        @focus="isOpen = true"
+        @blur="isOpen = false"
+        @keyup.esc="isOpen = false"
+      >
+    </div>
 
     <ul
       v-if="isOpen && suggestions.length > 0"
@@ -87,8 +93,11 @@ const selectSuggestion = (cityName) => {
       </li>
     </ul>
 
-    <p class="search-echo">
-      검색 중인 도시: {{ query }}
+    <p
+      v-if="query"
+      class="search-echo"
+    >
+      검색 중: <strong>{{ query }}</strong>
     </p>
   </div>
 </template>
@@ -98,34 +107,66 @@ const selectSuggestion = (cityName) => {
   position: relative;
 }
 
+.input-wrap {
+  position: relative;
+}
+
+/* 아이콘을 입력창 안쪽에 겹쳐 두고, 입력 글자는 그만큼 오른쪽에서 시작하게 한다 */
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  font-size: var(--fs-md);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 .search-input {
-  box-sizing: border-box;
   width: 100%;
-  padding: 8px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 11px 14px 11px 38px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  color: var(--text);
+  transition: all var(--ease);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  /* 테두리를 두껍게 만드는 대신 바깥으로 번지는 그림자를 써야 글자가 밀리지 않는다 */
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .search-echo {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: #606266;
+  margin: 9px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.search-echo strong {
+  color: var(--accent);
 }
 
 .suggestion-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   right: 0;
   left: 0;
   z-index: 10;
   margin: 0;
-  padding: 4px 0;
+  padding: 5px;
   list-style: none;
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
   animation: dropdown-open 0.18s ease-out;
 }
 
@@ -145,22 +186,28 @@ const selectSuggestion = (cityName) => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 8px 10px;
+  padding: 9px 11px;
   background: none;
   border: none;
-  font-size: 13px;
-  color: #303133;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-md);
+  color: var(--text);
   text-align: left;
   cursor: pointer;
+  transition: all var(--ease);
 }
 
 .suggestion-item:hover {
-  background-color: #ecf5ff;
-  color: #409eff;
+  background-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+.suggestion-name {
+  font-weight: 600;
 }
 
 .suggestion-meta {
-  font-size: 11px;
-  color: #909399;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
 }
 </style>

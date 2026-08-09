@@ -83,13 +83,17 @@ export const formatDayLength = (sunrise, sunset) => {
 }
 
 // AQI 등급(1~5)별 표시 정보. 인덱스 0은 쓰지 않으므로 자리만 채워 둔다.
+//
+// 색을 hex가 아니라 CSS 변수 이름으로 들고 있는 이유:
+// 인라인 style에도 var()가 그대로 동작하므로, 색 정의는 main.css 한 곳에만 두고
+// 여기서는 '어떤 의미의 색인지'만 가리킨다. 팔레트를 바꿔도 이 파일은 손댈 필요가 없다.
 const AQI_LEVELS = [
   null,
-  { label: '좋음', color: '#67c23a' },
-  { label: '보통', color: '#409eff' },
-  { label: '나쁨', color: '#e6a23c' },
-  { label: '많이 나쁨', color: '#f56c6c' },
-  { label: '매우 나쁨', color: '#a04040' },
+  { label: '좋음', color: 'var(--good)' },
+  { label: '보통', color: 'var(--cool)' },
+  { label: '나쁨', color: 'var(--warm)' },
+  { label: '많이 나쁨', color: 'var(--hot)' },
+  { label: '매우 나쁨', color: 'var(--severe)' },
 ]
 
 /**
@@ -97,5 +101,5 @@ const AQI_LEVELS = [
  * 등급 범위를 벗어난 값이 와도 화면이 깨지지 않도록 기본값을 돌려준다.
  */
 export const describeAqi = (aqi) => {
-  return AQI_LEVELS[aqi] ?? { label: '알 수 없음', color: '#909399' }
+  return AQI_LEVELS[aqi] ?? { label: '알 수 없음', color: 'var(--text-muted)' }
 }

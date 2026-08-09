@@ -28,25 +28,27 @@ defineProps({
 
 <style scoped>
 .dashboard-card {
-  margin-bottom: 14px;
-  padding: 12px;
-  background-color: #f7f9fc;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
+  padding: 18px;
+  background-color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  /* 뒤의 하늘 그라데이션이 은은하게 비치게 한다 */
+  backdrop-filter: blur(12px);
 }
 
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 /* 주의: 이 스타일은 fallback 내용(위 h3)에만 적용된다.
    부모가 #header로 넘긴 마크업은 부모 스코프에서 컴파일되므로 여기 스타일이 닿지 않는다. */
 .card-title {
   margin: 0;
-  font-size: 14px;
-  color: #409eff;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 </style>

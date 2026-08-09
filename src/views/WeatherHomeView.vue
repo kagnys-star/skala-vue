@@ -175,7 +175,7 @@ const toggleBookmark = (city) => {
 
       <!-- 데이터가 준비된 뒤에만 목록을 그린다 -->
       <template v-if="!weatherStore.isLoading && !weatherStore.errorMessage">
-        <div class="card-list">
+        <div class="card-list scroll-area">
           <WeatherCard
             v-for="city in filteredWeatherList"
             :key="city.id"
@@ -205,84 +205,103 @@ const toggleBookmark = (city) => {
     </BaseDashboardCard>
 
     <p class="status-bar">
-      {{ statusMessage }}
+      💬 {{ statusMessage }}
     </p>
   </div>
 </template>
 
 <style scoped>
+/* 화면 전체를 한 방향(세로)으로 흐르게 두고, 간격은 gap 하나로 통일한다.
+   각 블록에 margin-bottom을 따로 주면 간격이 조금씩 어긋난다. */
+.weather-home {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 /* #header 슬롯으로 넘긴 마크업은 '부모 스코프'에서 컴파일되므로,
    BaseDashboardCard의 .card-title 스타일이 적용되지 않는다. 여기서 직접 정의해야 한다. */
 .slot-card-title {
   margin: 0;
-  font-size: 14px;
-  color: #409eff;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 
 .count-badge {
-  padding: 2px 8px;
-  background-color: #ecf5ff;
-  border-radius: 10px;
-  font-size: 11px;
-  color: #409eff;
+  padding: 3px 10px;
+  background-color: var(--accent-soft);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--accent);
 }
 
+/* 카드를 한 줄에 몇 개 놓을지 화면 폭이 알아서 정하게 한다.
+   최소 260px을 확보하지 못하면 자동으로 한 칸씩 줄어든다. */
 .card-list {
-  max-height: 340px;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  max-height: 560px;
+  padding-right: 4px;
 }
 
 .partial-warning {
-  margin: 10px 0 0;
-  padding: 8px;
-  background-color: #fdf6ec;
-  border: 1px solid #faecd8;
-  border-radius: 4px;
-  font-size: 11px;
-  color: #e6a23c;
+  margin: 12px 0 0;
+  padding: 10px;
+  background-color: #fdf6ea;
+  border: 1px solid #f6e4c8;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--warm);
   text-align: center;
 }
 
 .empty-result {
   margin: 0;
-  padding: 16px;
-  background-color: #fdf6ec;
-  border: 1px solid #faecd8;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #e6a23c;
+  padding: 34px 16px;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  color: var(--text-muted);
   text-align: center;
 }
 
 .clock-area {
-  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
 }
 
 .clock-toggle {
-  width: 100%;
-  margin-top: 6px;
-  padding: 5px;
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  font-size: 11px;
-  color: #909399;
+  padding: 0 14px;
+  background-color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
+  white-space: nowrap;
   cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: all var(--ease);
 }
 
 .clock-toggle:hover {
-  border-color: #409eff;
-  color: #409eff;
+  color: var(--accent);
 }
 
 .status-bar {
   margin: 0;
-  padding: 10px;
-  background-color: #f0f9eb;
-  border: 1px solid #e1f3d8;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #67c23a;
+  padding: 11px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  color: var(--text-soft);
   text-align: center;
+  backdrop-filter: blur(8px);
 }
 </style>

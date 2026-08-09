@@ -212,142 +212,166 @@ const goToHome = () => {
 
 <style scoped>
 .detail-view {
-  padding: 12px;
-  background-color: #f7f9fc;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  background-color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
 }
 
 .detail-title {
-  margin: 0 0 12px;
-  font-size: 14px;
-  color: #409eff;
+  margin: 0;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 
 .detail-box {
-  padding: 12px;
-  background-color: #ffffff;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
+  padding: 18px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .detail-head {
   display: flex;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed #e4e7ed;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
 }
 
 .detail-place {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .detail-icon {
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
+  margin: -6px;
 }
 
 .detail-region {
   margin: 0;
-  font-size: 13px;
-  font-weight: bold;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 
 .detail-observed {
   margin: 2px 0 0;
-  font-size: 11px;
-  color: #909399;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
 }
 
 .detail-sub {
-  font-size: 11px;
-  color: #909399;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
 }
 
 .forecast-box {
-  margin-top: 12px;
-  padding: 12px;
-  background-color: #ffffff;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
+  padding: 18px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .forecast-title {
-  margin: 0 0 4px;
-  font-size: 13px;
-  color: #409eff;
+  margin: 0 0 6px;
+  font-size: var(--fs-base);
+  font-weight: 700;
 }
 
 .bookmark-btn {
-  padding: 4px 10px;
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  font-size: 11px;
-  color: #909399;
+  padding: 7px 14px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
   cursor: pointer;
+  transition: all var(--ease);
 }
 
 .bookmark-btn:hover {
-  border-color: #e6a23c;
-  color: #e6a23c;
+  border-color: var(--warm);
+  color: var(--warm);
 }
 
 .bookmark-btn.is-on {
-  background-color: #fdf6ec;
-  border-color: #e6a23c;
-  color: #e6a23c;
+  background-color: #fdf6ea;
+  border-color: var(--warm);
+  color: var(--warm);
 }
 
+/* 항목을 2열 격자로 배치한다. 좁은 화면에서는 1열로 접힌다.
+   최소 폭을 300px로 잡아야 넓은 화면에서 3열로 흩어지지 않는다.
+   라벨과 값이 너무 멀어지면 어느 값이 어느 항목인지 눈으로 잇기 어려워진다. */
 .detail-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2px 24px;
   margin: 0;
 }
 
 .detail-row {
   display: flex;
+  gap: 10px;
+  align-items: baseline;
   justify-content: space-between;
-  padding: 5px 0;
-  font-size: 13px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--surface-sunken);
+  font-size: var(--fs-md);
 }
 
 .detail-row dt {
-  color: #909399;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .detail-row dd {
   margin: 0;
-  color: #303133;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  text-align: right;
 }
 
 .detail-empty {
   margin: 0;
-  padding: 16px;
-  background-color: #fdf6ec;
-  border: 1px solid #faecd8;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #e6a23c;
+  padding: 34px 16px;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  color: var(--text-muted);
   text-align: center;
 }
 
 .back-btn {
   width: 100%;
-  margin-top: 12px;
-  padding: 8px;
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #606266;
+  padding: 12px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-soft);
   cursor: pointer;
+  transition: all var(--ease);
 }
 
 .back-btn:hover {
-  border-color: #409eff;
-  color: #409eff;
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
 }
 </style>

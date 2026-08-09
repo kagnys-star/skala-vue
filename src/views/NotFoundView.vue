@@ -31,51 +31,59 @@ const route = useRoute()
 
 <style scoped>
 .not-found-view {
-  padding: 40px 16px;
-  background-color: #f7f9fc;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
+  padding: 64px 20px;
+  background-color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
   text-align: center;
+  backdrop-filter: blur(12px);
 }
 
 .not-found-icon {
-  margin: 0 0 12px;
-  font-size: 44px;
+  margin: 0 0 14px;
+  font-size: 52px;
+  line-height: 1;
 }
 
 .not-found-title {
   margin: 0 0 10px;
-  font-size: 16px;
+  font-size: var(--fs-lg);
+  font-weight: 700;
 }
 
 .not-found-desc {
-  margin: 0 0 20px;
-  font-size: 12px;
-  line-height: 1.8;
-  color: #909399;
+  margin: 0 0 24px;
+  font-size: var(--fs-md);
+  line-height: 1.9;
+  color: var(--text-muted);
 }
 
 .not-found-path {
   display: inline-block;
-  margin-top: 4px;
-  padding: 2px 6px;
-  background-color: #ffffff;
-  border: 1px solid #e4e7ed;
-  border-radius: 3px;
-  color: #606266;
+  margin-top: 6px;
+  padding: 3px 9px;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
 }
 
 .home-link {
   display: inline-block;
-  padding: 9px 20px;
-  background-color: #409eff;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 12px 26px;
+  background-color: var(--accent);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+  font-weight: 600;
   color: #ffffff;
   text-decoration: none;
+  transition: all var(--ease);
 }
 
 .home-link:hover {
-  background-color: #66b1ff;
+  background-color: var(--accent-hover);
+  box-shadow: var(--shadow);
 }
 </style>
