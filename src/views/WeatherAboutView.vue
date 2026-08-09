@@ -16,6 +16,8 @@ import { RouterLink } from 'vue-router'
       <li><code>components/exercise/</code> 폴더 내부의 독립 부품 컴포넌트를 조합해 화면을 구성합니다.</li>
       <li>클라이언트 사이드 라우팅으로 새로고침 없이 화면이 전환됩니다.</li>
       <li>도시별 상세 관측 정보는 <code>/weather/:cityId</code> 동적 경로로 연결됩니다.</li>
+      <li>검색어는 <code>?q=</code> 쿼리 파라미터에 실시간 동기화되어, 주소를 그대로 공유할 수 있습니다.</li>
+      <li>존재하지 않는 도시 ID는 라우트 가드가 걸러 안내 페이지로 보냅니다.</li>
       <li>정의되지 않은 주소로 접근하면 Catch-all 라우트가 안내 페이지를 대신 보여줍니다.</li>
     </ul>
 

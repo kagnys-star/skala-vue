@@ -14,7 +14,10 @@ const cityDetail = ref(null)
 
 /**
  * 라우트 파라미터(:cityId)를 실제 도시 객체로 바꿔 담는다.
- * 없는 ID로 들어오면 null이 되고, 템플릿에서 안내 문구를 대신 보여준다.
+ *
+ * 없는 ID로 '진입'하는 경우는 라우터의 beforeEnter 가드가 NotFound로 돌려보내므로
+ * 여기까지 오지 않는다. 다만 아래 watch 설명처럼 '진입 후 파라미터만 바뀌는' 경우에는
+ * 가드가 다시 실행되지 않으므로, 그때를 대비해 null 처리를 남겨둔다.
  */
 const loadCityDetail = () => {
   const { cityId } = route.params
@@ -31,6 +34,7 @@ onMounted(loadCityDetail)
 // 주의) onMounted만으로는 부족하다.
 // /weather/city_01 에서 /weather/city_02 로 이동하면 라우트는 바뀌지만
 // 매칭된 컴포넌트가 같아서 Vue가 인스턴스를 '재사용'한다. 즉 다시 mount되지 않는다.
+// (같은 이유로 라우터의 beforeEnter 가드도 이때는 실행되지 않는다.)
 // 그래서 파라미터 변화를 따로 감시해 데이터를 다시 읽어야 화면이 갱신된다.
 watch(() => route.params.cityId, loadCityDetail)
 

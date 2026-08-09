@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, watchEffect } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { weatherMockList } from '@/data/weatherMockData'
 import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
 import SearchBar from '@/components/exercise/SearchBar.vue'
@@ -10,13 +10,24 @@ import WeatherSummary from '@/components/exercise/WeatherSummary.vue'
 
 // useRouter: 템플릿이 아닌 script에서 화면을 이동시킬 때 쓰는 라우터 인스턴스.
 // (템플릿에서 링크를 거는 <RouterLink>와 달리, 이쪽은 '코드로' 이동시키는 Programmatic Navigation)
+// useRoute: 지금 URL에 무엇이 담겨 있는지 읽는 쪽. 여기서는 검색어 쿼리(?q=)를 읽는 데 쓴다.
 const router = useRouter()
+const route = useRoute()
+
+/**
+ * 쿼리 문자열에서 검색어를 꺼낸다.
+ * route.query 값은 없으면 undefined, '?q=a&q=b'처럼 중복되면 배열이 되므로
+ * 문자열일 때만 받아들이고 나머지는 빈 문자열로 정규화한다.
+ */
+const readQueryKeyword = () => (typeof route.query.q === 'string' ? route.query.q : '')
 
 // 1) 화면에 필요한 반응형 상태 -------------------------------------------
 // 원본 목록은 데이터 모듈에서 가져오고, 이 화면은 그것을 반응형으로 감싸 쓴다.
 const weatherList = ref(weatherMockList)
 
-const searchQuery = ref('')
+// 초기값을 URL에서 읽는다. 덕분에 '/?q=서울' 링크를 그대로 공유하거나
+// 새로고침해도 검색 상태가 복원된다.
+const searchQuery = ref(readQueryKeyword())
 const selectedCityInfo = ref(null)
 const statusMessage = ref('카드를 클릭하거나 검색해 보세요.')
 const bookmarkedIds = ref([])
@@ -61,7 +72,33 @@ watchEffect(() => {
   )
 })
 
-// 4) 이벤트 핸들러 (자식 컴포넌트가 emit한 이벤트를 받아 상태를 바꾼다) -------
+// 4) 검색어 ↔ URL 쿼리 동기화 --------------------------------------------
+// 양쪽에서 서로를 바꾸므로 무한 루프가 나기 쉽다.
+// 두 감시자 모두 '이미 값이 같으면 아무것도 하지 않는다'로 시작해 고리를 끊는다.
+
+// (검색어 → URL) 타이핑할 때마다 주소창을 갱신한다.
+// push가 아니라 replace를 쓰는 이유: 글자 하나마다 히스토리가 쌓이면
+// 뒤로 가기를 수십 번 눌러야 이전 화면으로 돌아가게 된다.
+watch(searchQuery, (keyword) => {
+  if (keyword === readQueryKeyword()) {
+    return
+  }
+  // 검색어가 비면 '?q=' 라는 지저분한 꼬리표를 남기지 않고 쿼리 자체를 지운다.
+  router.replace({ query: keyword === '' ? {} : { q: keyword } })
+})
+
+// (URL → 검색어) 뒤로/앞으로 가기나 링크 직접 진입으로 주소가 바뀐 경우를 받는다.
+watch(
+  () => route.query.q,
+  () => {
+    const keyword = readQueryKeyword()
+    if (keyword !== searchQuery.value) {
+      searchQuery.value = keyword
+    }
+  },
+)
+
+// 5) 이벤트 핸들러 (자식 컴포넌트가 emit한 이벤트를 받아 상태를 바꾼다) -------
 const selectCard = (city) => {
   selectedCityInfo.value = city
 }
