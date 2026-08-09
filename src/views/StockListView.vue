@@ -98,7 +98,7 @@ const formatPrice = (value) => value.toLocaleString('en-US', { minimumFractionDi
     </BaseDashboardCard>
 
     <p class="stock-note">
-      무료 플랜은 하루 25회까지만 조회할 수 있어, 화면을 열 때마다 새로 받지 않고
+      무료 플랜은 분당 5회 · 하루 25회까지만 조회할 수 있어, 화면을 열 때마다 새로 받지 않고
       저장된 값을 먼저 보여줍니다. 최신 시세가 필요하면 새로고침을 눌러 주세요.
     </p>
   </section>

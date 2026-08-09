@@ -8,8 +8,8 @@ const CACHE_KEY = 'stock-cache'
 /**
  * 주식 시세 스토어.
  *
- * 무료 플랜이 하루 25회뿐이라 저장이 특히 중요하다.
- * 종목이 6개이므로 한 번 갱신할 때마다 6회를 쓴다. 즉 하루에 네 번 정도만 새로 받을 수 있다.
+ * 무료 플랜이 분당 5회 · 하루 25회뿐이라 저장이 특히 중요하다.
+ * 종목이 5개이므로 한 번 갱신할 때마다 5회를 쓴다. 즉 하루에 다섯 번만 새로 받을 수 있다.
  * 그래서 화면을 열 때마다 갱신하지 않고, 저장분이 있으면 그것을 먼저 보여준다.
  */
 export const useStockStore = defineStore('stock', () => {
@@ -48,18 +48,28 @@ export const useStockStore = defineStore('stock', () => {
     failedSymbols.value = []
 
     try {
-      const results = await Promise.allSettled(stockSymbols.map((item) => fetchStockQuote(item)))
-
       const loaded = []
       const failures = []
 
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          loaded.push(result.value)
-        } else {
-          failures.push({ item: stockSymbols[index], reason: result.reason })
+      /**
+       * 날씨와 달리 병렬(Promise.allSettled)로 부르지 않고 하나씩 순서대로 부른다.
+       *
+       * Alpha Vantage는 짧은 시간에 몰린 요청을 거절한다.
+       * 6종목을 한꺼번에 보내면 앞의 두 개만 처리되고 나머지는 한도 안내가 돌아온다.
+       * (그 안내가 HTTP 200 본문으로 오기 때문에 429처럼 보이지도 않아 원인을 찾기 어렵다)
+       * 실제로 실패한 종목을 단독으로 다시 부르면 정상 응답한다.
+       */
+      for (const item of stockSymbols) {
+        try {
+          loaded.push(await fetchStockQuote(item))
+        } catch (error) {
+          failures.push({ item, reason: error })
         }
-      })
+        // 다음 요청까지 잠깐 간격을 둔다. 마지막 종목 뒤에는 기다릴 이유가 없다.
+        if (item !== stockSymbols[stockSymbols.length - 1]) {
+          await new Promise((resolve) => setTimeout(resolve, 400))
+        }
+      }
 
       if (loaded.length === 0) {
         console.error('[stockStore] 모든 종목 조회에 실패했습니다.', failures[0].reason)
