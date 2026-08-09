@@ -6,7 +6,9 @@ import { RouterLink } from 'vue-router'
 
 <template>
   <section class="about-view">
-    <h2 class="about-title">ℹ️ 서비스 소개</h2>
+    <h2 class="about-title">
+      ℹ️ 서비스 소개
+    </h2>
 
     <p class="about-lead">
       본 앱은 Vue 3, Vue Router, Pinia를 기반으로 제작된 실습용 가상 관측 대시보드입니다.
@@ -26,7 +28,12 @@ import { RouterLink } from 'vue-router'
 
     <!-- 단순 이동은 RouterLink가 정석이다.
          <a href>와 달리 페이지 전체를 다시 내려받지 않고 컴포넌트만 교체된다. -->
-    <RouterLink class="home-link" :to="{ name: 'weather-home' }"> 대시보드 홈으로 이동 </RouterLink>
+    <RouterLink
+      class="home-link"
+      :to="{ name: 'weather-home' }"
+    >
+      대시보드 홈으로 이동
+    </RouterLink>
   </section>
 </template>
 

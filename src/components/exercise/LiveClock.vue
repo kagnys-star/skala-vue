@@ -44,13 +44,17 @@ const timeText = computed(() => now.value.toLocaleTimeString('ko-KR', { hour12: 
 <template>
   <div class="live-clock">
     <div class="clock-label">
-      <span class="live-dot"></span>
+      <span class="live-dot" />
       {{ label }}
     </div>
 
     <div class="clock-body">
-      <p class="clock-time">{{ timeText }}</p>
-      <p class="clock-date">{{ dateText }}</p>
+      <p class="clock-time">
+        {{ timeText }}
+      </p>
+      <p class="clock-date">
+        {{ dateText }}
+      </p>
     </div>
   </div>
 </template>

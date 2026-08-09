@@ -63,12 +63,22 @@ const selectSuggestion = (cityName) => {
       @focus="isOpen = true"
       @blur="isOpen = false"
       @keyup.esc="isOpen = false"
-    />
+    >
 
-    <ul v-if="isOpen && suggestions.length > 0" class="suggestion-dropdown">
-      <li v-for="city in suggestions" :key="city.id">
+    <ul
+      v-if="isOpen && suggestions.length > 0"
+      class="suggestion-dropdown"
+    >
+      <li
+        v-for="city in suggestions"
+        :key="city.id"
+      >
         <!-- mousedown.prevent: 클릭 순간 input의 blur가 먼저 발생해 목록이 닫히는 것을 막는다 -->
-        <button class="suggestion-item" @mousedown.prevent @click="selectSuggestion(city.name)">
+        <button
+          class="suggestion-item"
+          @mousedown.prevent
+          @click="selectSuggestion(city.name)"
+        >
           <span class="suggestion-name">{{ city.name }}</span>
           <span class="suggestion-meta">
             {{ city.status }} · {{ configStore.convertTemp(city.temp) }}{{ configStore.unitSymbol }}
@@ -77,7 +87,9 @@ const selectSuggestion = (cityName) => {
       </li>
     </ul>
 
-    <p class="search-echo">검색 중인 도시: {{ query }}</p>
+    <p class="search-echo">
+      검색 중인 도시: {{ query }}
+    </p>
   </div>
 </template>
 

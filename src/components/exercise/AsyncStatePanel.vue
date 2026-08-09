@@ -24,15 +24,35 @@ defineEmits(['retry'])
 <template>
   <!-- 로딩과 오류는 동시에 일어나지 않으므로 v-if / v-else-if로 하나만 그린다.
        둘 다 아닐 때는 아무것도 렌더링하지 않고, 부모가 실제 내용을 보여준다. -->
-  <div v-if="isLoading" class="state-panel state-loading">
-    <span class="spinner" aria-hidden="true"></span>
-    <p class="state-text">{{ loadingText }}</p>
+  <div
+    v-if="isLoading"
+    class="state-panel state-loading"
+  >
+    <span
+      class="spinner"
+      aria-hidden="true"
+    />
+    <p class="state-text">
+      {{ loadingText }}
+    </p>
   </div>
 
-  <div v-else-if="errorMessage" class="state-panel state-error">
-    <p class="state-title">⚠️ 날씨 정보를 가져오지 못했습니다</p>
-    <p class="state-text">{{ errorMessage }}</p>
-    <button class="retry-btn" @click="$emit('retry')">다시 시도</button>
+  <div
+    v-else-if="errorMessage"
+    class="state-panel state-error"
+  >
+    <p class="state-title">
+      ⚠️ 날씨 정보를 가져오지 못했습니다
+    </p>
+    <p class="state-text">
+      {{ errorMessage }}
+    </p>
+    <button
+      class="retry-btn"
+      @click="$emit('retry')"
+    >
+      다시 시도
+    </button>
   </div>
 </template>
 

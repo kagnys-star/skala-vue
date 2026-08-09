@@ -55,7 +55,9 @@ const goToHome = () => {
 
 <template>
   <section class="detail-view">
-    <h2 class="detail-title">📊 지역별 상세 기상 관측 정보</h2>
+    <h2 class="detail-title">
+      📊 지역별 상세 기상 관측 정보
+    </h2>
 
     <!-- 아직 불러오는 중이거나 실패한 경우 -->
     <AsyncStatePanel
@@ -66,9 +68,14 @@ const goToHome = () => {
     />
 
     <!-- 정상적으로 도시를 찾은 경우 -->
-    <div v-if="cityDetail" class="detail-box">
+    <div
+      v-if="cityDetail"
+      class="detail-box"
+    >
       <div class="detail-head">
-        <p class="detail-region">📍 지정 지역: {{ cityDetail.region }}</p>
+        <p class="detail-region">
+          📍 지정 지역: {{ cityDetail.region }}
+        </p>
 
         <button
           class="bookmark-btn"
@@ -102,11 +109,19 @@ const goToHome = () => {
     <!-- 로딩도 오류도 아닌데 도시가 없는 경우.
          진입 시점의 잘못된 ID는 라우터 가드가 막으므로, 여기 걸리는 건
          응답에서 이 도시만 빠진 경우다. (일부 도시 조회 실패) -->
-    <p v-else-if="!weatherStore.isLoading && !weatherStore.errorMessage" class="detail-empty">
+    <p
+      v-else-if="!weatherStore.isLoading && !weatherStore.errorMessage"
+      class="detail-empty"
+    >
       '{{ route.params.cityId }}' 에 해당하는 관측 정보가 없습니다.
     </p>
 
-    <button class="back-btn" @click="goToHome">← 메인 대시보드로 돌아가기</button>
+    <button
+      class="back-btn"
+      @click="goToHome"
+    >
+      ← 메인 대시보드로 돌아가기
+    </button>
   </section>
 </template>
 

@@ -8,15 +8,24 @@ const route = useRoute()
 
 <template>
   <section class="not-found-view">
-    <p class="not-found-icon">🌞❓</p>
-    <h2 class="not-found-title">페이지를 찾을 수 없습니다.</h2>
+    <p class="not-found-icon">
+      🌞❓
+    </p>
+    <h2 class="not-found-title">
+      페이지를 찾을 수 없습니다.
+    </h2>
 
     <p class="not-found-desc">
-      요청하신 주소가 존재하지 않거나, 아직 개발되지 않았습니다.<br />
+      요청하신 주소가 존재하지 않거나, 아직 개발되지 않았습니다.<br>
       <code class="not-found-path">{{ route.fullPath }}</code>
     </p>
 
-    <RouterLink class="home-link" :to="{ name: 'weather-home' }"> 날씨 메인으로 이동 </RouterLink>
+    <RouterLink
+      class="home-link"
+      :to="{ name: 'weather-home' }"
+    >
+      날씨 메인으로 이동
+    </RouterLink>
   </section>
 </template>
 

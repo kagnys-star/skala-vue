@@ -15,7 +15,9 @@ defineProps({
       <!-- 이름 있는 슬롯(named slot).
            부모가 #header를 채우지 않으면 아래 fallback 내용이 대신 렌더링된다. -->
       <slot name="header">
-        <h3 class="card-title">{{ title }}</h3>
+        <h3 class="card-title">
+          {{ title }}
+        </h3>
       </slot>
     </div>
 

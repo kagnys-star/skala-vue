@@ -13,7 +13,12 @@ const configStore = useConfigStore()
     </span>
 
     <!-- toggleUnit은 인자가 없으므로 괄호 없이 그대로 넘겨도 된다 -->
-    <button class="unit-btn" @click="configStore.toggleUnit">단위 변경</button>
+    <button
+      class="unit-btn"
+      @click="configStore.toggleUnit"
+    >
+      단위 변경
+    </button>
   </div>
 </template>
 

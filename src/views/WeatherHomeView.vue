@@ -130,8 +130,14 @@ const toggleBookmark = (city) => {
   <div class="weather-home">
     <!-- v-if로 시계를 껐다 켜면 onMounted / onUnmounted가 실제로 호출되는 것을 볼 수 있다 -->
     <div class="clock-area">
-      <LiveClock v-if="isClockVisible" label="실시간 관측 시각" />
-      <button class="clock-toggle" @click="isClockVisible = !isClockVisible">
+      <LiveClock
+        v-if="isClockVisible"
+        label="실시간 관측 시각"
+      />
+      <button
+        class="clock-toggle"
+        @click="isClockVisible = !isClockVisible"
+      >
         {{ isClockVisible ? '시계 끄기' : '시계 켜기' }}
       </button>
     </div>
@@ -143,14 +149,20 @@ const toggleBookmark = (city) => {
     <!-- BaseDashboardCard(공통 디자인) + SearchBar(slot으로 주입) -->
     <BaseDashboardCard title="🔍 도시 검색">
       <!-- 검색어는 props로 내려주고, 변경은 update-query 이벤트로 올려받는다 -->
-      <SearchBar :query="searchQuery" :city-list="weatherList" @update-query="onQueryUpdate" />
+      <SearchBar
+        :query="searchQuery"
+        :city-list="weatherList"
+        @update-query="onQueryUpdate"
+      />
     </BaseDashboardCard>
 
     <!-- BaseDashboardCard(공통 디자인) + WeatherCard 목록(slot으로 주입) -->
     <!-- 위 검색 카드는 title prop(fallback)을 쓰고, 여기는 #header로 직접 채운다 -->
     <BaseDashboardCard>
       <template #header>
-        <h3 class="slot-card-title">📋 지역별 날씨 현황</h3>
+        <h3 class="slot-card-title">
+          📋 지역별 날씨 현황
+        </h3>
         <span class="count-badge">{{ filteredWeatherList.length }}곳</span>
       </template>
 
@@ -175,18 +187,26 @@ const toggleBookmark = (city) => {
           />
         </div>
 
-        <p v-if="filteredWeatherList.length === 0" class="empty-result">
+        <p
+          v-if="filteredWeatherList.length === 0"
+          class="empty-result"
+        >
           '{{ searchQuery }}' 와(과) 일치하는 도시가 없습니다.
         </p>
 
         <!-- 일부 도시만 실패한 경우: 나머지는 정상이므로 목록은 그대로 두고 빠진 곳만 알린다 -->
-        <p v-if="weatherStore.failedCityNames.length > 0" class="partial-warning">
+        <p
+          v-if="weatherStore.failedCityNames.length > 0"
+          class="partial-warning"
+        >
           {{ weatherStore.failedCityNames.join(', ') }} 정보를 불러오지 못했습니다.
         </p>
       </template>
     </BaseDashboardCard>
 
-    <p class="status-bar">{{ statusMessage }}</p>
+    <p class="status-bar">
+      {{ statusMessage }}
+    </p>
   </div>
 </template>
 

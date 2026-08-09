@@ -39,7 +39,9 @@ const toggleBookmark = (city) => {
   <section class="bookmark-view">
     <BaseDashboardCard>
       <template #header>
-        <h3 class="slot-card-title">⭐ 북마크한 도시</h3>
+        <h3 class="slot-card-title">
+          ⭐ 북마크한 도시
+        </h3>
         <span class="count-badge">{{ bookmarkStore.bookmarkCount }}곳</span>
       </template>
 
@@ -65,14 +67,21 @@ const toggleBookmark = (city) => {
       </div>
 
       <!-- 빈 목록일 때 그냥 비워두면 고장난 것처럼 보이므로 다음 행동을 안내한다 -->
-      <p v-else-if="!weatherStore.isLoading && !weatherStore.errorMessage" class="empty-result">
-        아직 북마크한 도시가 없습니다.<br />
-        <RouterLink :to="{ name: 'weather-home' }">대시보드</RouterLink>에서 카드의 북마크를 눌러
+      <p
+        v-else-if="!weatherStore.isLoading && !weatherStore.errorMessage"
+        class="empty-result"
+      >
+        아직 북마크한 도시가 없습니다.<br>
+        <RouterLink :to="{ name: 'weather-home' }">
+          대시보드
+        </RouterLink>에서 카드의 북마크를 눌러
         보세요.
       </p>
     </BaseDashboardCard>
 
-    <p class="status-bar">{{ statusMessage }}</p>
+    <p class="status-bar">
+      {{ statusMessage }}
+    </p>
   </section>
 </template>
 

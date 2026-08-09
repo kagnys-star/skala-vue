@@ -36,8 +36,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # ESLint 오류가 있으면 배포하지 않고 여기서 멈춘다.
+      - name: Lint
+        run: npm run lint
+
       - name: Build Vue application
         run: npm run build
+        env:
+          # 로컬의 .env.local은 git에 올라가지 않으므로 CI에는 값이 없다.
+          # 저장소 Settings > Secrets and variables > Actions 에 같은 이름으로 등록해야 한다.
+          # 등록하지 않으면 빌드는 성공하지만 배포된 화면에서 401 오류가 뜬다.
+          VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v6

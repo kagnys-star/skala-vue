@@ -12,21 +12,39 @@ const bookmarkStore = useBookmarkStore()
 
 <template>
   <div class="app-shell">
-    <h1 class="app-title">🌤️ 과제 5: 스토어 적용</h1>
+    <h1 class="app-title">
+      🌤️ 실시간 날씨 대시보드
+    </h1>
 
     <!-- Navigation Bar + 단위 설정 영역 -->
     <div class="top-bar">
       <nav class="nav-bar">
         <!-- RouterLink는 최종적으로 <a>로 렌더링되지만, 클릭 시 페이지를 새로 받아오지 않고
              라우터가 컴포넌트만 교체한다. (SPA의 핵심) -->
-        <RouterLink class="nav-item" :to="{ name: 'weather-home' }">🌤️ 날씨 대시보드</RouterLink>
-        <RouterLink class="nav-item" :to="{ name: 'bookmark-list' }">
+        <RouterLink
+          class="nav-item"
+          :to="{ name: 'weather-home' }"
+        >
+          🌤️ 날씨 대시보드
+        </RouterLink>
+        <RouterLink
+          class="nav-item"
+          :to="{ name: 'bookmark-list' }"
+        >
           ⭐ 북마크
-          <span v-if="bookmarkStore.bookmarkCount > 0" class="nav-badge">
+          <span
+            v-if="bookmarkStore.bookmarkCount > 0"
+            class="nav-badge"
+          >
             {{ bookmarkStore.bookmarkCount }}
           </span>
         </RouterLink>
-        <RouterLink class="nav-item" :to="{ name: 'weather-about' }">ℹ️ 서비스 소개</RouterLink>
+        <RouterLink
+          class="nav-item"
+          :to="{ name: 'weather-about' }"
+        >
+          ℹ️ 서비스 소개
+        </RouterLink>
       </nav>
 
       <!-- 어느 화면에 있든 항상 보여야 하므로 RouterView 바깥, App에 둔다.

@@ -36,7 +36,10 @@ const hottestTemp = computed(() => configStore.convertTemp(hottestCity.value?.te
   <section class="summary-panel">
     <span class="summary-item">⭐ 북마크 {{ bookmarkStore.bookmarkCount }}곳</span>
     <span class="summary-item">🌡 평균 {{ averageTemp }}{{ configStore.unitSymbol }}</span>
-    <span v-if="hottestCity" class="summary-item">
+    <span
+      v-if="hottestCity"
+      class="summary-item"
+    >
       🔥 최고 {{ hottestCity.name }} {{ hottestTemp }}{{ configStore.unitSymbol }}
     </span>
   </section>

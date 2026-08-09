@@ -32,28 +32,59 @@ const displayTemp = computed(() => configStore.convertTemp(props.cityItem.temp))
 </script>
 
 <template>
-  <div class="weather-card" @click="emit('select-card', cityItem)">
+  <div
+    class="weather-card"
+    @click="emit('select-card', cityItem)"
+  >
     <div class="card-info">
       <p class="city-name">
         {{ cityItem.name }} ({{ cityItem.status }})
-        <span v-show="isBookmarked" class="star">⭐</span>
+        <span
+          v-show="isBookmarked"
+          class="star"
+        >⭐</span>
       </p>
-      <p class="city-temp">현재 기온: {{ displayTemp }}{{ configStore.unitSymbol }}</p>
-      <p class="city-detail">습도: {{ cityItem.humidity }}% / 풍속: {{ cityItem.wind }}m/s</p>
+      <p class="city-temp">
+        현재 기온: {{ displayTemp }}{{ configStore.unitSymbol }}
+      </p>
+      <p class="city-detail">
+        습도: {{ cityItem.humidity }}% / 풍속: {{ cityItem.wind }}m/s
+      </p>
 
       <!-- 주의: 더움/선선함 판정은 변환된 값이 아니라 '섭씨 원본'으로 해야 한다.
            화씨로 바꾼 값(82 등)을 25/28과 비교하면 모든 도시가 무더움으로 나온다. -->
-      <span v-if="cityItem.temp >= 28" class="badge badge-very-hot">🔥 무더움 (28도 이상)</span>
-      <span v-else-if="cityItem.temp >= 25" class="badge badge-hot">🌡 더움 (25도 이상)</span>
-      <span v-else class="badge badge-cool">❄ 선선함 (25도 미만)</span>
+      <span
+        v-if="cityItem.temp >= 28"
+        class="badge badge-very-hot"
+      >🔥 무더움 (28도 이상)</span>
+      <span
+        v-else-if="cityItem.temp >= 25"
+        class="badge badge-hot"
+      >🌡 더움 (25도 이상)</span>
+      <span
+        v-else
+        class="badge badge-cool"
+      >❄ 선선함 (25도 미만)</span>
     </div>
 
     <div class="card-actions">
       <!-- .stop: 카드 클릭(select-card)이 같이 발생하는 것을 막는다 -->
-      <button class="detail-btn" @click.stop="emit('click-detail', cityItem.id)">상세보기</button>
+      <button
+        class="detail-btn"
+        @click.stop="emit('click-detail', cityItem.id)"
+      >
+        상세보기
+      </button>
 
-      <label class="bookmark-label" @click.stop>
-        <input type="checkbox" :checked="isBookmarked" @change="emit('toggle-bookmark', cityItem)" />
+      <label
+        class="bookmark-label"
+        @click.stop
+      >
+        <input
+          type="checkbox"
+          :checked="isBookmarked"
+          @change="emit('toggle-bookmark', cityItem)"
+        >
         북마크
       </label>
     </div>
