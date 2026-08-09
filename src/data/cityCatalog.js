@@ -6,18 +6,30 @@
  *
  * query: OpenWeatherMap에 도시를 지정할 때 쓰는 문자열이다.
  *        동명 도시가 있어 국가 코드(KR)를 함께 넘긴다.
+ * lat/lon: 대기질 API는 도시 이름을 받지 않고 좌표만 받는다.
+ *        API가 알려준 실제 값을 그대로 적어두었다. (도시 좌표는 바뀌지 않는다)
  */
 export const cityCatalog = [
-  { id: 'city_01', name: '서울', region: '대한민국 서울특별시', query: 'Seoul,KR' },
-  { id: 'city_02', name: '수원', region: '대한민국 경기도 수원시', query: 'Suwon,KR' },
-  { id: 'city_03', name: '부산', region: '대한민국 부산광역시', query: 'Busan,KR' },
-  { id: 'city_04', name: '인천', region: '대한민국 인천광역시', query: 'Incheon,KR' },
-  { id: 'city_05', name: '대구', region: '대한민국 대구광역시', query: 'Daegu,KR' },
-  { id: 'city_06', name: '대전', region: '대한민국 대전광역시', query: 'Daejeon,KR' },
-  { id: 'city_07', name: '광주', region: '대한민국 광주광역시', query: 'Gwangju,KR' },
-  { id: 'city_08', name: '울산', region: '대한민국 울산광역시', query: 'Ulsan,KR' },
-  { id: 'city_09', name: '제주', region: '대한민국 제주특별자치도', query: 'Jeju City,KR' },
-  { id: 'city_10', name: '강릉', region: '대한민국 강원특별자치도 강릉시', query: 'Gangneung,KR' },
+  { id: 'city_01', name: '서울', region: '대한민국 서울특별시',
+    query: 'Seoul,KR', lat: 37.5683, lon: 126.9778 },
+  { id: 'city_02', name: '수원', region: '대한민국 경기도 수원시',
+    query: 'Suwon,KR', lat: 37.2911, lon: 127.0089 },
+  { id: 'city_03', name: '부산', region: '대한민국 부산광역시',
+    query: 'Busan,KR', lat: 35.1028, lon: 129.0403 },
+  { id: 'city_04', name: '인천', region: '대한민국 인천광역시',
+    query: 'Incheon,KR', lat: 37.45, lon: 126.4161 },
+  { id: 'city_05', name: '대구', region: '대한민국 대구광역시',
+    query: 'Daegu,KR', lat: 35.8, lon: 128.55 },
+  { id: 'city_06', name: '대전', region: '대한민국 대전광역시',
+    query: 'Daejeon,KR', lat: 36.3333, lon: 127.4167 },
+  { id: 'city_07', name: '광주', region: '대한민국 광주광역시',
+    query: 'Gwangju,KR', lat: 35.1547, lon: 126.9156 },
+  { id: 'city_08', name: '울산', region: '대한민국 울산광역시',
+    query: 'Ulsan,KR', lat: 35.5372, lon: 129.3167 },
+  { id: 'city_09', name: '제주', region: '대한민국 제주특별자치도',
+    query: 'Jeju City,KR', lat: 33.5097, lon: 126.5219 },
+  { id: 'city_10', name: '강릉', region: '대한민국 강원특별자치도 강릉시',
+    query: 'Gangneung,KR', lat: 37.7556, lon: 128.8961 },
 ]
 
 /**

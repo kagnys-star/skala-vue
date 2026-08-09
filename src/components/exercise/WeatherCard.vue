@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
+import { getWeatherIconUrl } from '@/utils/weatherFormat'
 
 const props = defineProps({
   // 선택된(혹은 목록의) 도시 객체 전체를 통째로 전달받는다.
@@ -36,6 +37,15 @@ const displayTemp = computed(() => configStore.convertTemp(props.cityItem.temp))
     class="weather-card"
     @click="emit('select-card', cityItem)"
   >
+    <!-- 응답에 함께 오던 아이콘 코드를 이제 이미지로 보여준다. (추가 호출 없음)
+         alt에 날씨 설명을 넣어 이미지가 안 뜨거나 화면 낭독 시에도 의미가 전달되게 한다. -->
+    <img
+      class="card-icon"
+      :src="getWeatherIconUrl(cityItem.icon)"
+      :alt="cityItem.status"
+      loading="lazy"
+    >
+
     <div class="card-info">
       <p class="city-name">
         {{ cityItem.name }} ({{ cityItem.status }})
@@ -46,6 +56,9 @@ const displayTemp = computed(() => configStore.convertTemp(props.cityItem.temp))
       </p>
       <p class="city-temp">
         현재 기온: {{ displayTemp }}{{ configStore.unitSymbol }}
+        <span class="city-feels">
+          (체감 {{ configStore.convertTemp(cityItem.feelsLike) }}{{ configStore.unitSymbol }})
+        </span>
       </p>
       <p class="city-detail">
         습도: {{ cityItem.humidity }}% / 풍속: {{ cityItem.wind }}m/s
@@ -96,6 +109,7 @@ const displayTemp = computed(() => configStore.convertTemp(props.cityItem.temp))
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
   margin-bottom: 10px;
   padding: 12px;
   background-color: #ffffff;
@@ -110,6 +124,21 @@ const displayTemp = computed(() => configStore.convertTemp(props.cityItem.temp))
 
 .weather-card:hover {
   border-color: #409eff;
+}
+
+.card-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.card-info {
+  flex: 1;
+}
+
+.city-feels {
+  font-size: 11px;
+  color: #909399;
 }
 
 .city-name {

@@ -35,9 +35,22 @@ const toWeatherItem = (city, data) => ({
   temp: Math.round(data.main.temp),
   // weather는 배열이고 비어 있을 수 있으므로 그대로 [0]을 믿지 않는다.
   status: data.weather?.[0]?.description ?? '정보 없음',
+  // 아이콘 코드. 끝의 d/n이 낮과 밤을 구분하므로 밤에는 밤 아이콘이 나온다.
+  icon: data.weather?.[0]?.icon ?? '01d',
   humidity: data.main.humidity,
   // 소수점이 길게 오는 경우가 있어 한 자리로 자른다. toFixed는 문자열을 주므로 숫자로 되돌린다.
   wind: Number((data.wind?.speed ?? 0).toFixed(1)),
+
+  // 아래는 원래 응답에 함께 오던 값들이다. 추가 호출 없이 그대로 쓸 수 있다.
+  feelsLike: Math.round(data.main.feels_like),
+  windDeg: data.wind?.deg ?? null,
+  pressure: data.main.pressure,
+  clouds: data.clouds?.all ?? null,
+  visibility: data.visibility ?? null,
+  sunrise: data.sys?.sunrise ?? null,
+  sunset: data.sys?.sunset ?? null,
+  // 관측 시각(UTC 기준 초 단위). '몇 분 전 값인지' 알려주는 데 쓴다.
+  observedAt: data.dt,
 })
 
 /**
@@ -50,6 +63,56 @@ export const fetchCityWeather = async (city) => {
   })
 
   return toWeatherItem(city, data)
+}
+
+/**
+ * 도시 한 곳의 5일치 예보를 가져온다.
+ *
+ * 응답의 list는 3시간 간격 40건(5일)이다.
+ * 화면에서는 앞쪽 일부만 쓰지만, 자르는 기준은 화면이 정할 일이므로 여기서는 전부 넘긴다.
+ */
+export const fetchCityForecast = async (city) => {
+  const { data } = await weatherClient.get('/forecast', {
+    params: { q: city.query },
+  })
+
+  return data.list.map((slot) => ({
+    // dt는 초 단위, JavaScript Date는 밀리초 단위라 1000을 곱해야 한다.
+    time: new Date(slot.dt * 1000),
+    temp: Math.round(slot.main.temp),
+    icon: slot.weather?.[0]?.icon ?? '01d',
+    status: slot.weather?.[0]?.description ?? '정보 없음',
+    // pop = probability of precipitation. 0~1 실수로 오므로 백분율로 바꾼다.
+    pop: Math.round((slot.pop ?? 0) * 100),
+  }))
+}
+
+/**
+ * 도시 한 곳의 대기질을 가져온다.
+ *
+ * 이 엔드포인트는 도시 이름을 받지 않고 좌표(lat/lon)만 받는다.
+ * 그래서 cityCatalog에 좌표를 함께 적어 두었다.
+ */
+export const fetchCityAirQuality = async (city) => {
+  const { data } = await weatherClient.get('/air_pollution', {
+    params: { lat: city.lat, lon: city.lon },
+  })
+
+  const current = data.list?.[0]
+  if (!current) {
+    throw new Error('대기질 응답이 비어 있습니다.')
+  }
+
+  return {
+    id: city.id,
+    name: city.name,
+    // aqi는 1(좋음) ~ 5(매우 나쁨) 등급이다.
+    aqi: current.main.aqi,
+    pm25: current.components.pm2_5,
+    pm10: current.components.pm10,
+    o3: current.components.o3,
+    no2: current.components.no2,
+  }
 }
 
 /**

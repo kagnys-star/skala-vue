@@ -41,9 +41,15 @@ const bookmarkStore = useBookmarkStore()
         </RouterLink>
         <RouterLink
           class="nav-item"
+          :to="{ name: 'air-quality' }"
+        >
+          🌫️ 대기질
+        </RouterLink>
+        <RouterLink
+          class="nav-item"
           :to="{ name: 'weather-about' }"
         >
-          ℹ️ 서비스 소개
+          ℹ️ 소개
         </RouterLink>
       </nav>
 

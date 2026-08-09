@@ -40,6 +40,12 @@ const routes = [
     meta: { title: '북마크 목록' },
   },
   {
+    path: '/air',
+    name: 'air-quality',
+    component: () => import('@/views/AirQualityView.vue'),
+    meta: { title: '대기질 순위' },
+  },
+  {
     // ':cityId'가 동적 세그먼트. /weather/city_01 → route.params.cityId === 'city_01'
     path: '/weather/:cityId',
     name: 'weather-detail',

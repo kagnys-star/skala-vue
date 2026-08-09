@@ -1,13 +1,25 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useConfigStore } from '@/stores/configStore'
 import { useBookmarkStore } from '@/stores/bookmarkStore'
 import { useWeatherStore } from '@/stores/weatherStore'
+import { useForecastStore } from '@/stores/forecastStore'
+import {
+  getWeatherIconUrl,
+  formatWindDirection,
+  formatClockTime,
+  formatRelativeTime,
+  formatDayLength,
+} from '@/utils/weatherFormat'
 import AsyncStatePanel from '@/components/exercise/AsyncStatePanel.vue'
+import ForecastChart from '@/components/exercise/ForecastChart.vue'
 
 // 관측 데이터는 스토어에서 읽는다.
 const weatherStore = useWeatherStore()
+
+// 예보는 '지금 보고 있는 도시' 것만 필요하므로 별도 스토어에서 도시 단위로 받아온다.
+const forecastStore = useForecastStore()
 
 // 상단 툴바에서 단위를 바꾸면 이 화면의 기온도 같이 바뀌어야 한다.
 const configStore = useConfigStore()
@@ -35,8 +47,24 @@ const cityDetail = computed(() => weatherStore.findCityById(route.params.cityId)
 // 도시를 못 찾았을 때 접근 오류가 나지 않도록 옵셔널 체이닝으로 감싼다.
 const displayTemp = computed(() => configStore.convertTemp(cityDetail.value?.temp ?? 0))
 
+// 이 화면에서 보여줄 예보 구간 (3시간 간격 8건 = 향후 24시간)
+const forecastSlots = computed(() => forecastStore.getNextDayForecast(route.params.cityId))
+
 // 상세 페이지 URL로 곧장 들어오는 경우엔 스토어가 비어 있으므로 여기서도 로딩을 보장한다.
 onMounted(() => weatherStore.ensureLoaded())
+
+/**
+ * 예보는 도시마다 따로 받아야 한다.
+ *
+ * immediate: true 로 두면 최초 진입 시에도 한 번 실행되므로 onMounted가 따로 필요 없다.
+ * 또 도시가 바뀌면(상세 → 다른 상세) 컴포넌트가 재사용되어 mount가 다시 일어나지 않는데,
+ * 이 감시자는 파라미터 변화를 보고 있으므로 그 경우에도 새 예보를 받아온다.
+ */
+watch(
+  () => route.params.cityId,
+  (cityId) => forecastStore.ensureLoaded(cityId),
+  { immediate: true },
+)
 
 const toggleBookmark = () => {
   // 도시를 못 찾은 상태에서는 버튼 자체가 렌더링되지 않지만, 방어적으로 한 번 더 확인한다.
@@ -73,9 +101,21 @@ const goToHome = () => {
       class="detail-box"
     >
       <div class="detail-head">
-        <p class="detail-region">
-          📍 지정 지역: {{ cityDetail.region }}
-        </p>
+        <div class="detail-place">
+          <img
+            class="detail-icon"
+            :src="getWeatherIconUrl(cityDetail.icon)"
+            :alt="cityDetail.status"
+          >
+          <div>
+            <p class="detail-region">
+              📍 {{ cityDetail.region }}
+            </p>
+            <p class="detail-observed">
+              {{ formatRelativeTime(cityDetail.observedAt) }} 관측
+            </p>
+          </div>
+        </div>
 
         <button
           class="bookmark-btn"
@@ -92,8 +132,14 @@ const goToHome = () => {
           <dd>{{ displayTemp }}{{ configStore.unitSymbol }}</dd>
         </div>
         <div class="detail-row">
+          <dt>체감 온도</dt>
+          <dd>
+            {{ configStore.convertTemp(cityDetail.feelsLike) }}{{ configStore.unitSymbol }}
+          </dd>
+        </div>
+        <div class="detail-row">
           <dt>기상 현황</dt>
-          <dd>{{ cityDetail.status }}</dd>
+          <dd>{{ cityDetail.status }} (구름 {{ cityDetail.clouds }}%)</dd>
         </div>
         <div class="detail-row">
           <dt>대기 습도</dt>
@@ -101,9 +147,48 @@ const goToHome = () => {
         </div>
         <div class="detail-row">
           <dt>현재 풍속</dt>
-          <dd>{{ cityDetail.wind }}m/s</dd>
+          <dd>
+            {{ formatWindDirection(cityDetail.windDeg) }}풍 {{ cityDetail.wind }}m/s
+          </dd>
+        </div>
+        <div class="detail-row">
+          <dt>기압 / 가시거리</dt>
+          <dd>
+            {{ cityDetail.pressure }}hPa / {{ Math.round(cityDetail.visibility / 1000) }}km
+          </dd>
+        </div>
+        <div class="detail-row">
+          <dt>일출 / 일몰</dt>
+          <dd>
+            {{ formatClockTime(cityDetail.sunrise) }} · {{ formatClockTime(cityDetail.sunset) }}
+            <span class="detail-sub">
+              (낮 {{ formatDayLength(cityDetail.sunrise, cityDetail.sunset) }})
+            </span>
+          </dd>
         </div>
       </dl>
+    </div>
+
+    <!-- 향후 24시간 예보. 현재 날씨와는 다른 API라 로딩·오류 상태도 따로 관리한다. -->
+    <div
+      v-if="cityDetail"
+      class="forecast-box"
+    >
+      <h3 class="forecast-title">
+        ⏱ 24시간 예보
+      </h3>
+
+      <AsyncStatePanel
+        :is-loading="forecastStore.loadingCityId === route.params.cityId"
+        :error-message="forecastStore.errorMessage"
+        loading-text="예보를 불러오는 중입니다..."
+        @retry="forecastStore.loadForecast(route.params.cityId)"
+      />
+
+      <ForecastChart
+        v-if="forecastSlots.length > 0"
+        :entries="forecastSlots"
+      />
     </div>
 
     <!-- 로딩도 오류도 아닌데 도시가 없는 경우.
@@ -155,10 +240,46 @@ const goToHome = () => {
   border-bottom: 1px dashed #e4e7ed;
 }
 
+.detail-place {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-icon {
+  width: 44px;
+  height: 44px;
+}
+
 .detail-region {
   margin: 0;
   font-size: 13px;
   font-weight: bold;
+}
+
+.detail-observed {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #909399;
+}
+
+.detail-sub {
+  font-size: 11px;
+  color: #909399;
+}
+
+.forecast-box {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+}
+
+.forecast-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #409eff;
 }
 
 .bookmark-btn {
