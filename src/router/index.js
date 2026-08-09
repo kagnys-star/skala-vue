@@ -34,6 +34,12 @@ const routes = [
     meta: { title: '서비스 소개' },
   },
   {
+    path: '/bookmarks',
+    name: 'bookmark-list',
+    component: () => import('@/views/BookmarkListView.vue'),
+    meta: { title: '북마크 목록' },
+  },
+  {
     // ':cityId'가 동적 세그먼트. /weather/city_01 → route.params.cityId === 'city_01'
     path: '/weather/:cityId',
     name: 'weather-detail',

@@ -14,6 +14,8 @@ import { RouterLink } from 'vue-router'
 
     <ul class="about-list">
       <li>온도 단위(섭씨/화씨)는 Pinia 스토어가 관리하며, 모든 화면에 즉시 반영됩니다.</li>
+      <li>북마크도 스토어가 관리하여 목록·상세·전용 화면 어디서나 함께 갱신됩니다.</li>
+      <li>단위 설정과 북마크는 브라우저에 저장되어 새로고침 후에도 유지됩니다.</li>
       <li><code>components/exercise/</code> 폴더 내부의 독립 부품 컴포넌트를 조합해 화면을 구성합니다.</li>
       <li>클라이언트 사이드 라우팅으로 새로고침 없이 화면이 전환됩니다.</li>
       <li>도시별 상세 관측 정보는 <code>/weather/:cityId</code> 동적 경로로 연결됩니다.</li>

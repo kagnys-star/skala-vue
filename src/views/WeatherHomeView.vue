@@ -2,6 +2,7 @@
 import { ref, computed, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { weatherMockList } from '@/data/weatherMockData'
+import { useBookmarkStore } from '@/stores/bookmarkStore'
 import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
 import SearchBar from '@/components/exercise/SearchBar.vue'
 import WeatherCard from '@/components/exercise/WeatherCard.vue'
@@ -13,6 +14,9 @@ import WeatherSummary from '@/components/exercise/WeatherSummary.vue'
 // useRoute: 지금 URL에 무엇이 담겨 있는지 읽는 쪽. 여기서는 검색어 쿼리(?q=)를 읽는 데 쓴다.
 const router = useRouter()
 const route = useRoute()
+
+// 북마크는 상세 페이지와 북마크 목록 화면도 함께 보는 값이라 스토어가 소유한다.
+const bookmarkStore = useBookmarkStore()
 
 /**
  * 쿼리 문자열에서 검색어를 꺼낸다.
@@ -30,12 +34,9 @@ const weatherList = ref(weatherMockList)
 const searchQuery = ref(readQueryKeyword())
 const selectedCityInfo = ref(null)
 const statusMessage = ref('카드를 클릭하거나 검색해 보세요.')
-const bookmarkedIds = ref([])
 
 // 시계 표시 여부 (onUnmounted가 실제로 동작하는지 확인하는 용도)
 const isClockVisible = ref(true)
-
-const isBookmarked = (cityId) => bookmarkedIds.value.includes(cityId)
 
 // 2) 검색 도시 (computed) ----------------------------------------------
 const filteredWeatherList = computed(() => {
@@ -54,17 +55,6 @@ watch(selectedCityInfo, (newCity, oldCity) => {
     oldCity ? `(이전 선택: ${oldCity.name})` : '(최초 선택)',
   )
 })
-
-watch(
-  bookmarkedIds,
-  (newIds, oldIds) => {
-    console.log(
-      `[watch deep] 북마크 목록이 변경되었습니다. 현재 ${newIds.length}곳`,
-      `/ newIds === oldIds 참조 동일 여부: ${newIds === oldIds}`,
-    )
-  },
-  { deep: true },
-)
 
 watchEffect(() => {
   console.log(
@@ -116,16 +106,14 @@ const goToDetail = (cityId) => {
   router.push({ name: 'weather-detail', params: { cityId } })
 }
 
-// WeatherCard의 toggle-bookmark 이벤트 처리
+// WeatherCard의 toggle-bookmark 이벤트 처리.
+// 실제 상태 변경은 스토어가 하고, 이 화면은 결과를 받아 안내 문구만 만든다.
 const toggleBookmark = (city) => {
-  const index = bookmarkedIds.value.indexOf(city.id)
-  if (index === -1) {
-    bookmarkedIds.value.push(city.id)
-    statusMessage.value = `${city.name}을(를) 북마크에 추가했습니다. ⭐`
-  } else {
-    bookmarkedIds.value.splice(index, 1)
-    statusMessage.value = `${city.name}을(를) 북마크에서 해제했습니다.`
-  }
+  const isAdded = bookmarkStore.toggleBookmark(city.id)
+
+  statusMessage.value = isAdded
+    ? `${city.name}을(를) 북마크에 추가했습니다. ⭐`
+    : `${city.name}을(를) 북마크에서 해제했습니다.`
 }
 </script>
 
@@ -139,8 +127,9 @@ const toggleBookmark = (city) => {
       </button>
     </div>
 
-    <!-- 원본 데이터만 넘기고, 요약 값 계산은 자식이 직접 한다 -->
-    <WeatherSummary :city-list="weatherList" :bookmarked-ids="bookmarkedIds" />
+    <!-- 원본 데이터만 넘기고, 요약 값 계산은 자식이 직접 한다.
+         북마크 개수는 전역 값이라 자식이 스토어에서 직접 읽으므로 넘기지 않는다. -->
+    <WeatherSummary :city-list="weatherList" />
 
     <!-- BaseDashboardCard(공통 디자인) + SearchBar(slot으로 주입) -->
     <BaseDashboardCard title="🔍 도시 검색">
@@ -161,7 +150,7 @@ const toggleBookmark = (city) => {
           v-for="city in filteredWeatherList"
           :key="city.id"
           :city-item="city"
-          :is-bookmarked="isBookmarked(city.id)"
+          :is-bookmarked="bookmarkStore.isBookmarked(city.id)"
           @select-card="selectCard"
           @click-detail="goToDetail"
           @toggle-bookmark="toggleBookmark"

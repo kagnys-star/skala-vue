@@ -1,5 +1,8 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
+import { loadState, saveState } from '@/utils/storage'
+
+const STORAGE_KEY = 'temperature-unit'
 
 /**
  * 앱 전역 표시 설정 스토어.
@@ -17,7 +20,10 @@ import { defineStore } from 'pinia'
 export const useConfigStore = defineStore('config', () => {
   // ---- state ----
   // 'celsius' | 'fahrenheit'. 원본 데이터는 항상 섭씨이고, 이 값은 '어떻게 보여줄지'만 결정한다.
-  const unit = ref('celsius')
+  // 새로고침해도 설정이 유지되도록 저장된 값에서 시작한다.
+  // 저장소 값을 그대로 믿지 않고 아는 값일 때만 받아들인다. (직접 수정될 수 있는 곳이다)
+  const restoredUnit = loadState(STORAGE_KEY, 'celsius')
+  const unit = ref(restoredUnit === 'fahrenheit' ? 'fahrenheit' : 'celsius')
 
   // ---- getters ----
   const unitSymbol = computed(() => (unit.value === 'celsius' ? '°C' : '°F'))
@@ -44,6 +50,10 @@ export const useConfigStore = defineStore('config', () => {
     unit.value = unit.value === 'celsius' ? 'fahrenheit' : 'celsius'
     console.log(`[configStore] 온도 단위를 '${unit.value}'로 변경했습니다.`)
   }
+
+  // ---- 영속화 ----
+  // unit은 문자열(원시값)이라 교체될 때마다 감시자가 실행된다. deep 옵션이 필요 없다.
+  watch(unit, (nextUnit) => saveState(STORAGE_KEY, nextUnit))
 
   // Setup Store는 여기서 반환한 것만 외부에서 쓸 수 있다.
   return { unit, unitSymbol, unitLabel, convertTemp, toggleUnit }

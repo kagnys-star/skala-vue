@@ -3,6 +3,11 @@
 // 화면마다 달라지는 내용은 전부 RouterView가 채우므로 여기에는 상태나 로직이 없다.
 import { RouterLink, RouterView } from 'vue-router'
 import UnitToggler from '@/components/exercise/UnitToggler.vue'
+import { useBookmarkStore } from '@/stores/bookmarkStore'
+
+// 내비게이션 바에 북마크 개수를 띄우기 위해 스토어를 읽는다.
+// 어느 화면에서 북마크를 눌러도 이 숫자가 즉시 따라 바뀐다.
+const bookmarkStore = useBookmarkStore()
 </script>
 
 <template>
@@ -15,6 +20,12 @@ import UnitToggler from '@/components/exercise/UnitToggler.vue'
         <!-- RouterLink는 최종적으로 <a>로 렌더링되지만, 클릭 시 페이지를 새로 받아오지 않고
              라우터가 컴포넌트만 교체한다. (SPA의 핵심) -->
         <RouterLink class="nav-item" :to="{ name: 'weather-home' }">🌤️ 날씨 대시보드</RouterLink>
+        <RouterLink class="nav-item" :to="{ name: 'bookmark-list' }">
+          ⭐ 북마크
+          <span v-if="bookmarkStore.bookmarkCount > 0" class="nav-badge">
+            {{ bookmarkStore.bookmarkCount }}
+          </span>
+        </RouterLink>
         <RouterLink class="nav-item" :to="{ name: 'weather-about' }">ℹ️ 서비스 소개</RouterLink>
       </nav>
 
@@ -72,6 +83,17 @@ import UnitToggler from '@/components/exercise/UnitToggler.vue'
 
 .nav-item:hover {
   color: #409eff;
+}
+
+.nav-badge {
+  display: inline-block;
+  min-width: 16px;
+  padding: 1px 5px;
+  background-color: #e6a23c;
+  border-radius: 8px;
+  font-size: 10px;
+  color: #ffffff;
+  text-align: center;
 }
 
 /* router-link-exact-active: 현재 경로와 '정확히' 일치할 때 라우터가 자동으로 붙여주는 클래스.

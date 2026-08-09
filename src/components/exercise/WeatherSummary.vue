@@ -1,23 +1,21 @@
 <script setup>
 import { computed } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
+import { useBookmarkStore } from '@/stores/bookmarkStore'
 
 const configStore = useConfigStore()
 
+// 북마크 개수는 전역 값이므로 부모를 거치지 않고 스토어에서 직접 읽는다.
+// 반면 cityList는 화면마다 달라질 수 있는 값이라 계속 props로 받는다.
+const bookmarkStore = useBookmarkStore()
+
 const props = defineProps({
-  // 원본 날씨 목록 (부모 소유). 요약 값 계산은 이 컴포넌트가 직접 한다.
+  // 요약할 날씨 목록 (부모 소유). 요약 값 계산은 이 컴포넌트가 직접 한다.
   cityList: {
     type: Array,
     default: () => [],
   },
-  // 북마크한 도시 id 목록 (부모 소유)
-  bookmarkedIds: {
-    type: Array,
-    default: () => [],
-  },
 })
-
-const bookmarkedCount = computed(() => props.bookmarkedIds.length)
 
 // 평균은 섭씨 원본으로 먼저 구하고, 표시 직전에만 단위를 변환한다.
 // (도시별로 화씨 변환한 뒤 평균 내면 반올림 오차가 누적된다)
@@ -36,7 +34,7 @@ const hottestTemp = computed(() => configStore.convertTemp(hottestCity.value?.te
 
 <template>
   <section class="summary-panel">
-    <span class="summary-item">⭐ 북마크 {{ bookmarkedCount }}곳</span>
+    <span class="summary-item">⭐ 북마크 {{ bookmarkStore.bookmarkCount }}곳</span>
     <span class="summary-item">🌡 평균 {{ averageTemp }}{{ configStore.unitSymbol }}</span>
     <span v-if="hottestCity" class="summary-item">
       🔥 최고 {{ hottestCity.name }} {{ hottestTemp }}{{ configStore.unitSymbol }}

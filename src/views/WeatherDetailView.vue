@@ -3,9 +3,13 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { findCityById } from '@/data/weatherMockData'
 import { useConfigStore } from '@/stores/configStore'
+import { useBookmarkStore } from '@/stores/bookmarkStore'
 
 // 상단 툴바에서 단위를 바꾸면 이 화면의 기온도 같이 바뀌어야 한다.
 const configStore = useConfigStore()
+
+// 북마크가 스토어로 올라온 덕분에, 목록 화면을 거치지 않고 여기서 바로 켜고 끌 수 있다.
+const bookmarkStore = useBookmarkStore()
 
 // useRoute: '지금 어떤 URL로 들어왔는지'를 읽는 객체 (params, query 등)
 // useRouter: '다른 곳으로 이동시키는' 객체 (push, back 등)
@@ -45,6 +49,14 @@ onMounted(loadCityDetail)
 // 그래서 파라미터 변화를 따로 감시해 데이터를 다시 읽어야 화면이 갱신된다.
 watch(() => route.params.cityId, loadCityDetail)
 
+const toggleBookmark = () => {
+  // 도시를 못 찾은 상태에서는 버튼 자체가 렌더링되지 않지만, 방어적으로 한 번 더 확인한다.
+  if (cityDetail.value === null) {
+    return
+  }
+  bookmarkStore.toggleBookmark(cityDetail.value.id)
+}
+
 // 메인 대시보드로 복귀. router.back()이 아니라 push를 쓰는 이유는
 // 주소창에 URL을 직접 입력해 들어온 경우 '뒤로 갈 곳'이 없기 때문이다.
 const goToHome = () => {
@@ -58,7 +70,17 @@ const goToHome = () => {
 
     <!-- 정상적으로 도시를 찾은 경우 -->
     <div v-if="cityDetail" class="detail-box">
-      <p class="detail-region">📍 지정 지역: {{ cityDetail.region }}</p>
+      <div class="detail-head">
+        <p class="detail-region">📍 지정 지역: {{ cityDetail.region }}</p>
+
+        <button
+          class="bookmark-btn"
+          :class="{ 'is-on': bookmarkStore.isBookmarked(cityDetail.id) }"
+          @click="toggleBookmark"
+        >
+          {{ bookmarkStore.isBookmarked(cityDetail.id) ? '⭐ 북마크됨' : '☆ 북마크' }}
+        </button>
+      </div>
 
       <dl class="detail-list">
         <div class="detail-row">
@@ -110,12 +132,40 @@ const goToHome = () => {
   border-radius: 6px;
 }
 
-.detail-region {
-  margin: 0 0 10px;
+.detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 1px dashed #e4e7ed;
+}
+
+.detail-region {
+  margin: 0;
   font-size: 13px;
   font-weight: bold;
+}
+
+.bookmark-btn {
+  padding: 4px 10px;
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #909399;
+  cursor: pointer;
+}
+
+.bookmark-btn:hover {
+  border-color: #e6a23c;
+  color: #e6a23c;
+}
+
+.bookmark-btn.is-on {
+  background-color: #fdf6ec;
+  border-color: #e6a23c;
+  color: #e6a23c;
 }
 
 .detail-list {
