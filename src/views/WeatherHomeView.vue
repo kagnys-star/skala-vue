@@ -136,7 +136,7 @@ const toggleBookmark = (city) => {
       @refresh="weatherStore.loadWeather"
     />
 
-    <!-- 영화 · 주식은 날씨와 별개 주제라 대시보드에 섞지 않고 이동 버튼만 둔다 -->
+    <!-- 영화는 날씨와 별개 주제라 대시보드에 섞지 않고 이동 버튼만 둔다 -->
     <nav class="quick-links">
       <RouterLink
         class="quick-link"
@@ -146,18 +146,6 @@ const toggleBookmark = (city) => {
         <span class="quick-body">
           <strong>인기 영화</strong>
           <small>TMDB 순위와 상세 정보</small>
-        </span>
-        <span class="quick-arrow">→</span>
-      </RouterLink>
-
-      <RouterLink
-        class="quick-link"
-        :to="{ name: 'stock-list' }"
-      >
-        <span class="quick-icon">📈</span>
-        <span class="quick-body">
-          <strong>주식 시세</strong>
-          <small>주요 종목 현재가와 등락</small>
         </span>
         <span class="quick-arrow">→</span>
       </RouterLink>
@@ -305,11 +293,15 @@ const toggleBookmark = (city) => {
   text-align: center;
 }
 
-/* 두 버튼이 나란히, 좁아지면 세로로 쌓인다 */
+/* 버튼이 화면 전체 폭까지 늘어나지 않고 카드 크기를 유지하게 한다 */
 .quick-links {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+.quick-links .quick-link {
+  flex: 0 1 280px;
 }
 
 .quick-link {

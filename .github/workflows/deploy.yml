@@ -45,8 +45,10 @@ jobs:
         env:
           # 로컬의 .env.local은 git에 올라가지 않으므로 CI에는 값이 없다.
           # 저장소 Settings > Secrets and variables > Actions 에 같은 이름으로 등록해야 한다.
-          # 등록하지 않으면 빌드는 성공하지만 배포된 화면에서 401 오류가 뜬다.
+          # 여기 나열하지 않은 키는 Secrets에 등록해 두었어도 빌드에 전달되지 않는다.
+          # (실제로 TMDB 키가 이 목록에 없어서 빌드에는 전달되지 않은 채 배포된 적이 있다)
           VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
+          VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v6
