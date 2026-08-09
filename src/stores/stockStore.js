@@ -5,6 +5,43 @@ import { loadState, saveState } from '@/utils/storage'
 
 const CACHE_KEY = 'stock-cache'
 
+// 요청 사이에 두는 간격. 짧으면 서버가 '너무 몰아서 보낸다'며 일부를 거절한다.
+const REQUEST_GAP_MS = 1200
+// 거절당한 종목을 다시 부르기 전에 기다리는 시간
+const RETRY_DELAY_MS = 3000
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * 종목 목록을 하나씩 순서대로 조회한다.
+ *
+ * 날씨와 달리 병렬(Promise.allSettled)로 부르지 않는 이유:
+ * Alpha Vantage는 짧은 시간에 몰린 요청을 거절하고
+ * "Please consider spreading out your free API requests more sparingly" 라고 답한다.
+ * 게다가 그 안내가 HTTP 200 본문으로 오기 때문에 429처럼 보이지도 않아 원인을 찾기 어렵다.
+ *
+ * @returns {{ loaded: object[], failures: object[] }} 성공 목록과 실패 목록
+ */
+const fetchInSequence = async (items) => {
+  const loaded = []
+  const failures = []
+
+  for (const [index, item] of items.entries()) {
+    try {
+      loaded.push(await fetchStockQuote(item))
+    } catch (error) {
+      failures.push({ item, reason: error })
+    }
+
+    // 마지막 종목 뒤에는 기다릴 이유가 없다.
+    if (index < items.length - 1) {
+      await delay(REQUEST_GAP_MS)
+    }
+  }
+
+  return { loaded, failures }
+}
+
 /**
  * 주식 시세 스토어.
  *
@@ -48,27 +85,28 @@ export const useStockStore = defineStore('stock', () => {
     failedSymbols.value = []
 
     try {
-      const loaded = []
-      const failures = []
+      // 1차 조회
+      const first = await fetchInSequence(stockSymbols)
+
+      let loaded = first.loaded
+      let failures = first.failures
 
       /**
-       * 날씨와 달리 병렬(Promise.allSettled)로 부르지 않고 하나씩 순서대로 부른다.
+       * 실패한 종목만 한 번 더 시도한다.
        *
-       * Alpha Vantage는 짧은 시간에 몰린 요청을 거절한다.
-       * 6종목을 한꺼번에 보내면 앞의 두 개만 처리되고 나머지는 한도 안내가 돌아온다.
-       * (그 안내가 HTTP 200 본문으로 오기 때문에 429처럼 보이지도 않아 원인을 찾기 어렵다)
-       * 실제로 실패한 종목을 단독으로 다시 부르면 정상 응답한다.
+       * 위 안내대로 간격을 두어도 간헐적으로 한두 종목이 거절당한다.
+       * 거절된 종목을 잠시 뒤 단독으로 부르면 정상 응답하므로, 한 번의 재시도로 대부분 채워진다.
+       * 하루 한도가 25회뿐이라 재시도는 딱 한 번만 한다.
        */
-      for (const item of stockSymbols) {
-        try {
-          loaded.push(await fetchStockQuote(item))
-        } catch (error) {
-          failures.push({ item, reason: error })
-        }
-        // 다음 요청까지 잠깐 간격을 둔다. 마지막 종목 뒤에는 기다릴 이유가 없다.
-        if (item !== stockSymbols[stockSymbols.length - 1]) {
-          await new Promise((resolve) => setTimeout(resolve, 400))
-        }
+      if (failures.length > 0) {
+        console.warn(
+          `[stockStore] ${failures.map((f) => f.item.symbol).join(', ')} 재시도합니다.`,
+        )
+        await delay(RETRY_DELAY_MS)
+
+        const retried = await fetchInSequence(failures.map((failure) => failure.item))
+        loaded = [...loaded, ...retried.loaded]
+        failures = retried.failures
       }
 
       if (loaded.length === 0) {
