@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { weatherMockList } from '@/data/weatherMockData'
+import { useWeatherStore } from '@/stores/weatherStore'
 import { loadState, saveState } from '@/utils/storage'
 
 const STORAGE_KEY = 'bookmarked-ids'
@@ -14,6 +14,10 @@ const STORAGE_KEY = 'bookmarked-ids'
  * 여러 화면이 공유해야 하는 값이므로 스토어로 끌어올린다.
  */
 export const useBookmarkStore = defineStore('bookmark', () => {
+  // 다른 스토어를 쓸 때는 이렇게 setup 안에서 꺼내 온다.
+  // 북마크는 'id 목록'만 알고, 그 id에 해당하는 날씨 데이터는 weatherStore가 갖고 있다.
+  const weatherStore = useWeatherStore()
+
   // ---- state ----
   // 도시 객체가 아니라 id만 저장한다.
   // 객체를 통째로 담으면 원본 날씨 데이터가 갱신돼도 북마크 쪽은 옛날 기온을 들고 있게 된다.
@@ -29,11 +33,13 @@ export const useBookmarkStore = defineStore('bookmark', () => {
 
   /**
    * id 목록을 실제 도시 객체 목록으로 바꿔준다.
-   * 원본(weatherMockList) 순서를 기준으로 걸러내므로,
-   * 저장된 id 중 지금은 없어진 도시가 있어도 자연스럽게 제외된다.
+   *
+   * 받아온 날씨 목록을 기준으로 걸러내므로,
+   * 아직 데이터가 안 왔거나 그 도시만 조회에 실패한 경우에는 자연스럽게 빠진다.
+   * (저장된 북마크 id 자체는 지우지 않으므로, 다시 불러오면 되살아난다)
    */
   const bookmarkedCities = computed(() =>
-    weatherMockList.filter((city) => bookmarkedIds.value.includes(city.id)),
+    weatherStore.weatherList.filter((city) => bookmarkedIds.value.includes(city.id)),
   )
 
   // ---- actions ----

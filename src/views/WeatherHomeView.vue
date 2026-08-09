@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed, watch, watchEffect } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { weatherMockList } from '@/data/weatherMockData'
 import { useBookmarkStore } from '@/stores/bookmarkStore'
+import { useWeatherStore } from '@/stores/weatherStore'
 import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
 import SearchBar from '@/components/exercise/SearchBar.vue'
 import WeatherCard from '@/components/exercise/WeatherCard.vue'
 import LiveClock from '@/components/exercise/LiveClock.vue'
 import WeatherSummary from '@/components/exercise/WeatherSummary.vue'
+import AsyncStatePanel from '@/components/exercise/AsyncStatePanel.vue'
 
 // useRouter: 템플릿이 아닌 script에서 화면을 이동시킬 때 쓰는 라우터 인스턴스.
 // (템플릿에서 링크를 거는 <RouterLink>와 달리, 이쪽은 '코드로' 이동시키는 Programmatic Navigation)
@@ -18,6 +19,14 @@ const route = useRoute()
 // 북마크는 상세 페이지와 북마크 목록 화면도 함께 보는 값이라 스토어가 소유한다.
 const bookmarkStore = useBookmarkStore()
 
+// 날씨 데이터와 로딩/오류 상태도 스토어가 소유한다.
+const weatherStore = useWeatherStore()
+
+// 화면이 열리면 데이터를 요청한다.
+// ensureLoaded는 이미 받아온 데이터가 있으면 아무것도 하지 않으므로,
+// 상세 화면에 다녀와 이 화면이 다시 mount돼도 API를 또 부르지 않는다.
+onMounted(() => weatherStore.ensureLoaded())
+
 /**
  * 쿼리 문자열에서 검색어를 꺼낸다.
  * route.query 값은 없으면 undefined, '?q=a&q=b'처럼 중복되면 배열이 되므로
@@ -26,8 +35,8 @@ const bookmarkStore = useBookmarkStore()
 const readQueryKeyword = () => (typeof route.query.q === 'string' ? route.query.q : '')
 
 // 1) 화면에 필요한 반응형 상태 -------------------------------------------
-// 원본 목록은 데이터 모듈에서 가져오고, 이 화면은 그것을 반응형으로 감싸 쓴다.
-const weatherList = ref(weatherMockList)
+// 원본 목록은 스토어가 소유한다. 이 화면은 읽기만 하므로 computed로 연결한다.
+const weatherList = computed(() => weatherStore.weatherList)
 
 // 초기값을 URL에서 읽는다. 덕분에 '/?q=서울' 링크를 그대로 공유하거나
 // 새로고침해도 검색 상태가 복원된다.
@@ -145,21 +154,36 @@ const toggleBookmark = (city) => {
         <span class="count-badge">{{ filteredWeatherList.length }}곳</span>
       </template>
 
-      <div class="card-list">
-        <WeatherCard
-          v-for="city in filteredWeatherList"
-          :key="city.id"
-          :city-item="city"
-          :is-bookmarked="bookmarkStore.isBookmarked(city.id)"
-          @select-card="selectCard"
-          @click-detail="goToDetail"
-          @toggle-bookmark="toggleBookmark"
-        />
-      </div>
+      <!-- 불러오는 중이거나 실패했을 때는 목록 대신 이 패널이 그려진다 -->
+      <AsyncStatePanel
+        :is-loading="weatherStore.isLoading"
+        :error-message="weatherStore.errorMessage"
+        @retry="weatherStore.loadWeather"
+      />
 
-      <p v-if="filteredWeatherList.length === 0" class="empty-result">
-        '{{ searchQuery }}' 와(과) 일치하는 도시가 없습니다.
-      </p>
+      <!-- 데이터가 준비된 뒤에만 목록을 그린다 -->
+      <template v-if="!weatherStore.isLoading && !weatherStore.errorMessage">
+        <div class="card-list">
+          <WeatherCard
+            v-for="city in filteredWeatherList"
+            :key="city.id"
+            :city-item="city"
+            :is-bookmarked="bookmarkStore.isBookmarked(city.id)"
+            @select-card="selectCard"
+            @click-detail="goToDetail"
+            @toggle-bookmark="toggleBookmark"
+          />
+        </div>
+
+        <p v-if="filteredWeatherList.length === 0" class="empty-result">
+          '{{ searchQuery }}' 와(과) 일치하는 도시가 없습니다.
+        </p>
+
+        <!-- 일부 도시만 실패한 경우: 나머지는 정상이므로 목록은 그대로 두고 빠진 곳만 알린다 -->
+        <p v-if="weatherStore.failedCityNames.length > 0" class="partial-warning">
+          {{ weatherStore.failedCityNames.join(', ') }} 정보를 불러오지 못했습니다.
+        </p>
+      </template>
     </BaseDashboardCard>
 
     <p class="status-bar">{{ statusMessage }}</p>
@@ -186,6 +210,17 @@ const toggleBookmark = (city) => {
 .card-list {
   max-height: 340px;
   overflow-y: auto;
+}
+
+.partial-warning {
+  margin: 10px 0 0;
+  padding: 8px;
+  background-color: #fdf6ec;
+  border: 1px solid #faecd8;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #e6a23c;
+  text-align: center;
 }
 
 .empty-result {

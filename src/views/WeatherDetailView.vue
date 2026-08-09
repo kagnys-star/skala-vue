@@ -1,9 +1,13 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { findCityById } from '@/data/weatherMockData'
 import { useConfigStore } from '@/stores/configStore'
 import { useBookmarkStore } from '@/stores/bookmarkStore'
+import { useWeatherStore } from '@/stores/weatherStore'
+import AsyncStatePanel from '@/components/exercise/AsyncStatePanel.vue'
+
+// 관측 데이터는 스토어에서 읽는다.
+const weatherStore = useWeatherStore()
 
 // 상단 툴바에서 단위를 바꾸면 이 화면의 기온도 같이 바뀌어야 한다.
 const configStore = useConfigStore()
@@ -17,37 +21,22 @@ const bookmarkStore = useBookmarkStore()
 const route = useRoute()
 const router = useRouter()
 
-// 화면에 뿌릴 도시 객체. 아직 못 찾았을 수도 있으므로 null로 시작한다.
-const cityDetail = ref(null)
+/**
+ * 화면에 뿌릴 도시 객체.
+ *
+ * 예전에는 Mock 배열에서 직접 찾아 ref에 담았지만, 이제 원본은 스토어에 있다.
+ * ref에 복사해 두면 스토어 데이터가 갱신돼도 이 화면은 옛 값을 들고 있게 되므로,
+ * 스토어를 그대로 따라가는 computed로 둔다.
+ * URL이 바뀌면 route.params.cityId가 바뀌고, 이 computed가 알아서 다시 계산된다.
+ * (덕분에 예전에 필요했던 watch가 필요 없어졌다)
+ */
+const cityDetail = computed(() => weatherStore.findCityById(route.params.cityId))
 
 // 도시를 못 찾았을 때 접근 오류가 나지 않도록 옵셔널 체이닝으로 감싼다.
 const displayTemp = computed(() => configStore.convertTemp(cityDetail.value?.temp ?? 0))
 
-/**
- * 라우트 파라미터(:cityId)를 실제 도시 객체로 바꿔 담는다.
- *
- * 없는 ID로 '진입'하는 경우는 라우터의 beforeEnter 가드가 NotFound로 돌려보내므로
- * 여기까지 오지 않는다. 다만 아래 watch 설명처럼 '진입 후 파라미터만 바뀌는' 경우에는
- * 가드가 다시 실행되지 않으므로, 그때를 대비해 null 처리를 남겨둔다.
- */
-const loadCityDetail = () => {
-  const { cityId } = route.params
-  cityDetail.value = findCityById(cityId)
-
-  if (cityDetail.value === null) {
-    console.warn(`[WeatherDetailView] '${cityId}'에 해당하는 도시를 찾지 못했습니다.`)
-  }
-}
-
-// Mount 시점에 한 번 데이터를 채운다.
-onMounted(loadCityDetail)
-
-// 주의) onMounted만으로는 부족하다.
-// /weather/city_01 에서 /weather/city_02 로 이동하면 라우트는 바뀌지만
-// 매칭된 컴포넌트가 같아서 Vue가 인스턴스를 '재사용'한다. 즉 다시 mount되지 않는다.
-// (같은 이유로 라우터의 beforeEnter 가드도 이때는 실행되지 않는다.)
-// 그래서 파라미터 변화를 따로 감시해 데이터를 다시 읽어야 화면이 갱신된다.
-watch(() => route.params.cityId, loadCityDetail)
+// 상세 페이지 URL로 곧장 들어오는 경우엔 스토어가 비어 있으므로 여기서도 로딩을 보장한다.
+onMounted(() => weatherStore.ensureLoaded())
 
 const toggleBookmark = () => {
   // 도시를 못 찾은 상태에서는 버튼 자체가 렌더링되지 않지만, 방어적으로 한 번 더 확인한다.
@@ -67,6 +56,14 @@ const goToHome = () => {
 <template>
   <section class="detail-view">
     <h2 class="detail-title">📊 지역별 상세 기상 관측 정보</h2>
+
+    <!-- 아직 불러오는 중이거나 실패한 경우 -->
+    <AsyncStatePanel
+      :is-loading="weatherStore.isLoading"
+      :error-message="weatherStore.errorMessage"
+      loading-text="관측 정보를 불러오는 중입니다..."
+      @retry="weatherStore.loadWeather"
+    />
 
     <!-- 정상적으로 도시를 찾은 경우 -->
     <div v-if="cityDetail" class="detail-box">
@@ -102,8 +99,10 @@ const goToHome = () => {
       </dl>
     </div>
 
-    <!-- 존재하지 않는 도시 ID로 들어온 경우 (예: /weather/city_99) -->
-    <p v-else class="detail-empty">
+    <!-- 로딩도 오류도 아닌데 도시가 없는 경우.
+         진입 시점의 잘못된 ID는 라우터 가드가 막으므로, 여기 걸리는 건
+         응답에서 이 도시만 빠진 경우다. (일부 도시 조회 실패) -->
+    <p v-else-if="!weatherStore.isLoading && !weatherStore.errorMessage" class="detail-empty">
       '{{ route.params.cityId }}' 에 해당하는 관측 정보가 없습니다.
     </p>
 

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import WeatherHomeView from '@/views/WeatherHomeView.vue'
-import { findCityById } from '@/data/weatherMockData'
+import { findCityInCatalog } from '@/data/cityCatalog'
 
 // 브라우저 탭에 항상 붙일 서비스 이름. 아래 beforeEach에서 각 화면 제목과 조합한다.
 const APP_TITLE = '날씨 대시보드'
@@ -48,7 +48,7 @@ const routes = [
     // 제목이 URL에 따라 달라지므로 문자열 대신 함수로 둔다. (아래 beforeEach가 호출해준다)
     meta: {
       title: (to) => {
-        const city = findCityById(to.params.cityId)
+        const city = findCityInCatalog(to.params.cityId)
         return city ? `${city.name} 상세 관측` : '상세 관측'
       },
     },
@@ -58,11 +58,15 @@ const routes = [
      * 존재하지 않는 도시 ID로 들어오면 컴포넌트를 아예 만들지 않고 NotFound로 보낸다.
      * '일단 그리고 나서 없다고 알려주기'보다 '들어오기 전에 막기'가 라우터다운 처리다.
      *
+     * 판단 기준은 API 응답이 아니라 도시 카탈로그다.
+     * API 호출은 비동기라 가드가 실행되는 시점에는 아직 데이터가 없을 수 있고,
+     * 서버가 죽었다고 해서 '/weather/city_01'이 없는 주소가 되는 것도 아니기 때문이다.
+     *
      * 주소는 사용자가 입력한 그대로 남겨야 무엇이 잘못됐는지 알 수 있으므로,
      * redirect가 아니라 pathMatch를 직접 채워 NotFound 컴포넌트만 바꿔 끼운다.
      */
     beforeEnter: (to) => {
-      if (findCityById(to.params.cityId) !== null) {
+      if (findCityInCatalog(to.params.cityId) !== null) {
         return true // 통과
       }
 

@@ -1,15 +1,21 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useBookmarkStore } from '@/stores/bookmarkStore'
+import { useWeatherStore } from '@/stores/weatherStore'
 import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
 import WeatherCard from '@/components/exercise/WeatherCard.vue'
+import AsyncStatePanel from '@/components/exercise/AsyncStatePanel.vue'
 
 const router = useRouter()
 
 // 이 화면은 자기 데이터를 하나도 갖지 않는다. 전부 스토어에서 읽는다.
 // 북마크 목록이 화면이 아니라 스토어에 있기 때문에 이런 화면을 새로 만들 수 있다.
 const bookmarkStore = useBookmarkStore()
+const weatherStore = useWeatherStore()
+
+// 이 주소로 곧장 들어올 수도 있으므로 여기서도 데이터 로딩을 보장한다.
+onMounted(() => weatherStore.ensureLoaded())
 
 const statusMessage = ref('북마크한 도시 목록입니다.')
 
@@ -37,7 +43,16 @@ const toggleBookmark = (city) => {
         <span class="count-badge">{{ bookmarkStore.bookmarkCount }}곳</span>
       </template>
 
-      <div v-if="bookmarkStore.bookmarkCount > 0" class="card-list">
+      <AsyncStatePanel
+        :is-loading="weatherStore.isLoading"
+        :error-message="weatherStore.errorMessage"
+        @retry="weatherStore.loadWeather"
+      />
+
+      <div
+        v-if="!weatherStore.isLoading && !weatherStore.errorMessage && bookmarkStore.bookmarkCount > 0"
+        class="card-list"
+      >
         <WeatherCard
           v-for="city in bookmarkStore.bookmarkedCities"
           :key="city.id"
@@ -50,7 +65,7 @@ const toggleBookmark = (city) => {
       </div>
 
       <!-- 빈 목록일 때 그냥 비워두면 고장난 것처럼 보이므로 다음 행동을 안내한다 -->
-      <p v-else class="empty-result">
+      <p v-else-if="!weatherStore.isLoading && !weatherStore.errorMessage" class="empty-result">
         아직 북마크한 도시가 없습니다.<br />
         <RouterLink :to="{ name: 'weather-home' }">대시보드</RouterLink>에서 카드의 북마크를 눌러
         보세요.
