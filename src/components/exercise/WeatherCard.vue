@@ -14,6 +14,10 @@ defineProps({
 
 // 요구사항: 카드 선택은 select-card, 상세보기는 click-detail.
 // 북마크 토글은 부모(bookmarkedIds)가 실제 상태를 갖고 있어 별도 emit이 필요하다.
+//
+// click-detail은 원래 표시용 문자열(도시명, 날씨)을 넘겼지만,
+// 이제 부모가 상세 페이지로 라우팅해야 하므로 식별자인 id만 넘긴다.
+// '무엇을 눌렀는지'만 알리고 '무엇을 할지'는 부모가 정하는 것이 자식 컴포넌트의 올바른 역할이다.
 const emit = defineEmits(['select-card', 'click-detail', 'toggle-bookmark'])
 </script>
 
@@ -34,9 +38,7 @@ const emit = defineEmits(['select-card', 'click-detail', 'toggle-bookmark'])
 
     <div class="card-actions">
       <!-- .stop: 카드 클릭(select-card)이 같이 발생하는 것을 막는다 -->
-      <button class="detail-btn" @click.stop="emit('click-detail', cityItem.name, cityItem.status)">
-        상세보기
-      </button>
+      <button class="detail-btn" @click.stop="emit('click-detail', cityItem.id)">상세보기</button>
 
       <label class="bookmark-label" @click.stop>
         <input type="checkbox" :checked="isBookmarked" @change="emit('toggle-bookmark', cityItem)" />

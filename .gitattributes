@@ -1,0 +1,5 @@
+# 개행 문자 정규화
+# 저장소(및 Linux 컨테이너 작업 트리)에는 항상 LF로 보관한다.
+# Windows 호스트에서 편집하더라도 컨테이너 안의 도구(ESLint/Prettier/Vite)가
+# CRLF 때문에 오탐을 내는 것을 막는다.
+* text=auto eol=lf

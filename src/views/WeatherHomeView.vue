@@ -1,24 +1,20 @@
 <script setup>
 import { ref, computed, watch, watchEffect } from 'vue'
-import BaseDashboardCard from './components/exercise/BaseDashboardCard.vue'
-import SearchBar from './components/exercise/SearchBar.vue'
-import WeatherCard from './components/exercise/WeatherCard.vue'
-import LiveClock from './components/exercise/LiveClock.vue'
-import WeatherSummary from './components/exercise/WeatherSummary.vue'
+import { useRouter } from 'vue-router'
+import { weatherMockList } from '@/data/weatherMockData'
+import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
+import SearchBar from '@/components/exercise/SearchBar.vue'
+import WeatherCard from '@/components/exercise/WeatherCard.vue'
+import LiveClock from '@/components/exercise/LiveClock.vue'
+import WeatherSummary from '@/components/exercise/WeatherSummary.vue'
 
-// 1) 모든 반응형 데이터는 WeatherParent가 소유한다 (2일차와 동일) --------
-const weatherList = ref([
-  { id: 'city_01', name: '서울', temp: 28, status: '맑음', humidity: 55, wind: 2.5 },
-  { id: 'city_02', name: '수원', temp: 24, status: '비', humidity: 80, wind: 1.8 },
-  { id: 'city_03', name: '부산', temp: 26, status: '구름', humidity: 65, wind: 3.2 },
-  { id: 'city_04', name: '인천', temp: 25, status: '흐림', humidity: 70, wind: 4.1 },
-  { id: 'city_05', name: '대구', temp: 31, status: '맑음', humidity: 45, wind: 1.2 },
-  { id: 'city_06', name: '대전', temp: 27, status: '구름', humidity: 60, wind: 2.0 },
-  { id: 'city_07', name: '광주', temp: 29, status: '맑음', humidity: 58, wind: 1.6 },
-  { id: 'city_08', name: '울산', temp: 26, status: '비', humidity: 75, wind: 2.8 },
-  { id: 'city_09', name: '제주', temp: 23, status: '흐림', humidity: 85, wind: 5.3 },
-  { id: 'city_10', name: '강릉', temp: 22, status: '맑음', humidity: 62, wind: 3.5 },
-])
+// useRouter: 템플릿이 아닌 script에서 화면을 이동시킬 때 쓰는 라우터 인스턴스.
+// (템플릿에서 링크를 거는 <RouterLink>와 달리, 이쪽은 '코드로' 이동시키는 Programmatic Navigation)
+const router = useRouter()
+
+// 1) 화면에 필요한 반응형 상태 -------------------------------------------
+// 원본 목록은 데이터 모듈에서 가져오고, 이 화면은 그것을 반응형으로 감싸 쓴다.
+const weatherList = ref(weatherMockList)
 
 const searchQuery = ref('')
 const selectedCityInfo = ref(null)
@@ -65,7 +61,7 @@ watchEffect(() => {
   )
 })
 
-// 이벤트 핸들러 (자식 컴포넌트가 emit한 이벤트를 받아 상태를 바꾼다) -------
+// 4) 이벤트 핸들러 (자식 컴포넌트가 emit한 이벤트를 받아 상태를 바꾼다) -------
 const selectCard = (city) => {
   selectedCityInfo.value = city
 }
@@ -76,9 +72,11 @@ const onQueryUpdate = (value) => {
   console.log(`[emits] SearchBar -> update-query 수신: '${value}'`)
 }
 
-// WeatherCard의 click-detail 이벤트 처리
-const showDetail = (cityName, status) => {
-  window.alert(`${cityName}의 현재 날씨는 [${status}] 상태입니다.`)
+// WeatherCard의 click-detail 이벤트 처리.
+// 이전에는 window.alert()로 내용을 띄웠지만, 이제는 상세 페이지로 화면을 이동시킨다.
+// 경로 문자열을 직접 조립하지 않고 라우트 이름 + params로 넘겨 오타 위험을 없앤다.
+const goToDetail = (cityId) => {
+  router.push({ name: 'weather-detail', params: { cityId } })
 }
 
 // WeatherCard의 toggle-bookmark 이벤트 처리
@@ -95,9 +93,7 @@ const toggleBookmark = (city) => {
 </script>
 
 <template>
-  <div class="weather-app">
-    <h2 class="app-title">🌤️ 과제 3: 날씨 (컴포넌트)</h2>
-
+  <div class="weather-home">
     <!-- v-if로 시계를 껐다 켜면 onMounted / onUnmounted가 실제로 호출되는 것을 볼 수 있다 -->
     <div class="clock-area">
       <LiveClock v-if="isClockVisible" label="실시간 관측 시각" />
@@ -112,11 +108,7 @@ const toggleBookmark = (city) => {
     <!-- BaseDashboardCard(공통 디자인) + SearchBar(slot으로 주입) -->
     <BaseDashboardCard title="🔍 도시 검색">
       <!-- 검색어는 props로 내려주고, 변경은 update-query 이벤트로 올려받는다 -->
-      <SearchBar
-        :query="searchQuery"
-        :city-list="weatherList"
-        @update-query="onQueryUpdate"
-      />
+      <SearchBar :query="searchQuery" :city-list="weatherList" @update-query="onQueryUpdate" />
     </BaseDashboardCard>
 
     <!-- BaseDashboardCard(공통 디자인) + WeatherCard 목록(slot으로 주입) -->
@@ -134,7 +126,7 @@ const toggleBookmark = (city) => {
           :city-item="city"
           :is-bookmarked="isBookmarked(city.id)"
           @select-card="selectCard"
-          @click-detail="showDetail"
+          @click-detail="goToDetail"
           @toggle-bookmark="toggleBookmark"
         />
       </div>
@@ -149,21 +141,6 @@ const toggleBookmark = (city) => {
 </template>
 
 <style scoped>
-.weather-app {
-  width: 420px;
-  padding: 16px;
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  font-family: 'Malgun Gothic', sans-serif;
-  color: #303133;
-}
-
-.app-title {
-  margin: 0 0 16px;
-  font-size: 18px;
-}
-
 /* #header 슬롯으로 넘긴 마크업은 '부모 스코프'에서 컴파일되므로,
    BaseDashboardCard의 .card-title 스타일이 적용되지 않는다. 여기서 직접 정의해야 한다. */
 .slot-card-title {
