@@ -48,6 +48,8 @@ const toggleBookmark = (city) => {
       <AsyncStatePanel
         :is-loading="weatherStore.isLoading"
         :error-message="weatherStore.errorMessage"
+        loading-text="날씨 정보를 불러오는 중입니다..."
+        error-title="날씨 정보를 가져오지 못했습니다"
         @retry="weatherStore.loadWeather"
       />
 

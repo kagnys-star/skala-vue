@@ -2,6 +2,9 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { cityCatalog } from '@/data/cityCatalog'
 import { fetchCityWeather, describeApiError } from '@/api/weatherApi'
+import { loadState, saveState } from '@/utils/storage'
+
+const CACHE_KEY = 'weather-cache'
 
 /**
  * 날씨 데이터 스토어.
@@ -11,15 +14,30 @@ import { fetchCityWeather, describeApiError } from '@/api/weatherApi'
  *
  * 데이터뿐 아니라 '지금 불러오는 중인가(isLoading)', '실패했는가(errorMessage)'까지
  * 함께 들고 있어야 어느 화면에서든 같은 로딩/오류 화면을 그릴 수 있다.
+ *
+ * 캐시 정책:
+ * 마지막으로 성공한 응답을 localStorage에 저장해 둔다.
+ *   - 앱을 다시 열면 저장분을 먼저 보여주고, 그 뒤 조용히 새로 받아온다. (빈 화면을 안 보여준다)
+ *   - 새로 받기에 실패하면 저장분을 계속 보여주되 '언제 받은 값인지' 함께 알린다.
+ * 이 API는 간헐적으로 401을 내는 일이 있어, 실패했다고 화면을 비우면 쓸모가 크게 떨어진다.
  */
 export const useWeatherStore = defineStore('weather', () => {
   // ---- state ----
-  const weatherList = ref([])
+  const restored = loadState(CACHE_KEY, null)
+
+  // 저장분이 배열을 갖고 있을 때만 신뢰한다. (직접 수정될 수 있는 곳이다)
+  const hasValidCache = Array.isArray(restored?.list) && restored.list.length > 0
+
+  const weatherList = ref(hasValidCache ? restored.list : [])
+  // 지금 화면에 보이는 값을 받아온 시각. 저장분을 복원했다면 그때의 시각이다.
+  const fetchedAt = ref(hasValidCache ? restored.savedAt : null)
+  // 화면의 값이 '방금 받은 것'이 아니라 '저장해 둔 것'인지 여부
+  const isStale = ref(hasValidCache)
+
   const isLoading = ref(false)
   const errorMessage = ref('')
   // 일부 도시만 실패한 경우 어떤 도시가 빠졌는지 알려주기 위한 목록
   const failedCityNames = ref([])
-  const lastLoadedAt = ref(null)
 
   // ---- getters ----
   const hasData = computed(() => weatherList.value.length > 0)
@@ -40,7 +58,7 @@ export const useWeatherStore = defineStore('weather', () => {
    * 카탈로그의 모든 도시 날씨를 받아온다.
    *
    * Promise.all이 아니라 allSettled를 쓰는 이유:
-   * all은 하나라도 실패하면 즉시 전체가 실패로 끝나 성공한 9곳까지 버리게 된다.
+   * all은 하나라도 실패하면 즉시 전체가 실패로 끝나 성공한 나머지까지 버리게 된다.
    * allSettled는 전부 기다린 뒤 성공/실패를 각각 돌려주므로, 되는 것만이라도 보여줄 수 있다.
    */
   const loadWeather = async () => {
@@ -69,16 +87,27 @@ export const useWeatherStore = defineStore('weather', () => {
       })
 
       if (loadedCities.length === 0) {
-        // 전부 실패 = 개별 도시 문제가 아니라 키/네트워크 문제다. 첫 실패 원인으로 대표 메시지를 만든다.
-        errorMessage.value = describeApiError(failures[0].reason)
-        weatherList.value = []
+        // 전부 실패 = 개별 도시 문제가 아니라 키/네트워크 문제다.
         console.error('[weatherStore] 모든 도시 조회에 실패했습니다.', failures[0].reason)
+
+        // 저장해 둔 값이 있으면 화면을 비우지 않는다. 대신 최신이 아님을 알린다.
+        if (hasData.value) {
+          isStale.value = true
+          console.warn('[weatherStore] 저장된 이전 값을 그대로 보여줍니다.')
+          return
+        }
+
+        errorMessage.value = describeApiError(failures[0].reason)
         return
       }
 
       weatherList.value = loadedCities
       failedCityNames.value = failures.map((failure) => failure.city.name)
-      lastLoadedAt.value = new Date()
+      fetchedAt.value = Date.now()
+      isStale.value = false
+
+      // 다음 실행에서 쓸 수 있도록 성공한 응답을 저장해 둔다.
+      saveState(CACHE_KEY, { savedAt: fetchedAt.value, list: loadedCities })
 
       if (failures.length > 0) {
         console.warn(`[weatherStore] 일부 도시 조회 실패: ${failedCityNames.value.join(', ')}`)
@@ -91,13 +120,17 @@ export const useWeatherStore = defineStore('weather', () => {
   }
 
   /**
-   * 아직 데이터가 없을 때만 불러온다.
+   * 화면이 열릴 때 부른다.
    *
-   * 상세 페이지 URL로 바로 들어오는 경우처럼, 어느 화면이 먼저 열릴지 알 수 없다.
-   * 각 화면이 이 함수를 부르면 '처음 열린 화면이 한 번만' 실제로 호출하게 된다.
+   * 저장된 값이 있어도 그것은 과거 시점의 날씨이므로 한 번은 갱신을 시도한다.
+   * 다만 이미 이번 실행에서 갱신에 성공했다면(isStale === false) 다시 부르지 않는다.
+   * 덕분에 화면을 오갈 때마다 API를 반복 호출하지 않는다.
    */
   const ensureLoaded = async () => {
-    if (hasData.value || isLoading.value) {
+    if (isLoading.value) {
+      return
+    }
+    if (hasData.value && !isStale.value) {
       return
     }
     await loadWeather()
@@ -105,10 +138,11 @@ export const useWeatherStore = defineStore('weather', () => {
 
   return {
     weatherList,
+    fetchedAt,
+    isStale,
     isLoading,
     errorMessage,
     failedCityNames,
-    lastLoadedAt,
     hasData,
     findCityById,
     isNight,

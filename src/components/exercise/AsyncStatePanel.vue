@@ -13,7 +13,12 @@ defineProps({
   // 로딩 중에 보여줄 문구. 화면마다 다르게 쓸 수 있도록 열어둔다.
   loadingText: {
     type: String,
-    default: '날씨 정보를 불러오는 중입니다...',
+    default: '정보를 불러오는 중입니다...',
+  },
+  // 오류 제목. 이 컴포넌트는 날씨 외에 영화·주식 화면에서도 쓰이므로 문구를 고정하지 않는다.
+  errorTitle: {
+    type: String,
+    default: '정보를 가져오지 못했습니다',
   },
 })
 
@@ -42,7 +47,7 @@ defineEmits(['retry'])
     class="state-panel state-error"
   >
     <p class="state-title">
-      ⚠️ 날씨 정보를 가져오지 못했습니다
+      ⚠️ {{ errorTitle }}
     </p>
     <p class="state-text">
       {{ errorMessage }}

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, watchEffect, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useBookmarkStore } from '@/stores/bookmarkStore'
 import { useWeatherStore } from '@/stores/weatherStore'
 import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
@@ -9,6 +9,7 @@ import WeatherCard from '@/components/exercise/WeatherCard.vue'
 import LiveClock from '@/components/exercise/LiveClock.vue'
 import WeatherSummary from '@/components/exercise/WeatherSummary.vue'
 import AsyncStatePanel from '@/components/exercise/AsyncStatePanel.vue'
+import StaleDataNotice from '@/components/exercise/StaleDataNotice.vue'
 
 // useRouter: 템플릿이 아닌 script에서 화면을 이동시킬 때 쓰는 라우터 인스턴스.
 // (템플릿에서 링크를 거는 <RouterLink>와 달리, 이쪽은 '코드로' 이동시키는 Programmatic Navigation)
@@ -128,6 +129,40 @@ const toggleBookmark = (city) => {
 
 <template>
   <div class="weather-home">
+    <!-- 갱신에 실패해 저장분을 보여주는 중일 때만 나타난다 -->
+    <StaleDataNotice
+      :is-stale="weatherStore.isStale"
+      :fetched-at="weatherStore.fetchedAt"
+      @refresh="weatherStore.loadWeather"
+    />
+
+    <!-- 영화 · 주식은 날씨와 별개 주제라 대시보드에 섞지 않고 이동 버튼만 둔다 -->
+    <nav class="quick-links">
+      <RouterLink
+        class="quick-link"
+        :to="{ name: 'movie-list' }"
+      >
+        <span class="quick-icon">🎬</span>
+        <span class="quick-body">
+          <strong>인기 영화</strong>
+          <small>TMDB 순위와 상세 정보</small>
+        </span>
+        <span class="quick-arrow">→</span>
+      </RouterLink>
+
+      <RouterLink
+        class="quick-link"
+        :to="{ name: 'stock-list' }"
+      >
+        <span class="quick-icon">📈</span>
+        <span class="quick-body">
+          <strong>주식 시세</strong>
+          <small>주요 종목 현재가와 등락</small>
+        </span>
+        <span class="quick-arrow">→</span>
+      </RouterLink>
+    </nav>
+
     <!-- v-if로 시계를 껐다 켜면 onMounted / onUnmounted가 실제로 호출되는 것을 볼 수 있다 -->
     <div class="clock-area">
       <LiveClock
@@ -170,6 +205,8 @@ const toggleBookmark = (city) => {
       <AsyncStatePanel
         :is-loading="weatherStore.isLoading"
         :error-message="weatherStore.errorMessage"
+        loading-text="날씨 정보를 불러오는 중입니다..."
+        error-title="날씨 정보를 가져오지 못했습니다"
         @retry="weatherStore.loadWeather"
       />
 
@@ -266,6 +303,65 @@ const toggleBookmark = (city) => {
   font-size: var(--fs-md);
   color: var(--text-muted);
   text-align: center;
+}
+
+/* 두 버튼이 나란히, 좁아지면 세로로 쌓인다 */
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.quick-link {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  transition: all var(--ease);
+}
+
+.quick-link:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.quick-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.quick-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.quick-body strong {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.quick-body small {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.quick-arrow {
+  font-size: var(--fs-lg);
+  color: var(--text-muted);
+  transition: all var(--ease);
+}
+
+.quick-link:hover .quick-arrow {
+  color: var(--accent);
+  transform: translateX(3px);
 }
 
 .clock-area {

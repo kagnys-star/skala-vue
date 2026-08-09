@@ -92,6 +92,7 @@ const goToHome = () => {
       :is-loading="weatherStore.isLoading"
       :error-message="weatherStore.errorMessage"
       loading-text="관측 정보를 불러오는 중입니다..."
+      error-title="관측 정보를 가져오지 못했습니다"
       @retry="weatherStore.loadWeather"
     />
 
@@ -182,6 +183,7 @@ const goToHome = () => {
         :is-loading="forecastStore.loadingCityId === route.params.cityId"
         :error-message="forecastStore.errorMessage"
         loading-text="예보를 불러오는 중입니다..."
+        error-title="예보를 가져오지 못했습니다"
         @retry="forecastStore.loadForecast(route.params.cityId)"
       />
 

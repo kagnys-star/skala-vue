@@ -46,6 +46,18 @@ const routes = [
     meta: { title: '대기질 순위' },
   },
   {
+    path: '/movies',
+    name: 'movie-list',
+    component: () => import('@/views/MovieListView.vue'),
+    meta: { title: '인기 영화' },
+  },
+  {
+    path: '/stocks',
+    name: 'stock-list',
+    component: () => import('@/views/StockListView.vue'),
+    meta: { title: '주식 시세' },
+  },
+  {
     // ':cityId'가 동적 세그먼트. /weather/city_01 → route.params.cityId === 'city_01'
     path: '/weather/:cityId',
     name: 'weather-detail',

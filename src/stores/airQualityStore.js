@@ -1,14 +1,19 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { cityCatalog } from '@/data/cityCatalog'
+import { majorCities } from '@/data/cityCatalog'
 import { fetchCityAirQuality, describeApiError } from '@/api/weatherApi'
 
 /**
  * 대기질 스토어.
  *
- * weatherStore와 구조가 거의 같다. 10개 도시를 병렬로 받아오고,
+ * weatherStore와 구조가 거의 같다. 도시들을 병렬로 받아오고,
  * 일부만 실패하면 성공한 것만 보여준다.
- * 다만 대기질 화면에서만 필요한 데이터라 별도 스토어로 두었다.
+ *
+ * 전체 54개 도시가 아니라 광역시 중심의 대표 도시(majorCities)만 조회한다.
+ * 대기질도 도시마다 한 번씩 호출해야 해서, 날씨 조회 54회에 더하면
+ * 무료 플랜의 분당 60회 한도를 넘기기 때문이다.
+ *
+ * 대기질 화면에서만 필요한 데이터라 별도 스토어로 두었다.
  * 대시보드만 보고 나가는 사용자에게는 이 호출이 아예 일어나지 않는다.
  */
 export const useAirQualityStore = defineStore('airQuality', () => {
@@ -38,7 +43,7 @@ export const useAirQualityStore = defineStore('airQuality', () => {
     failedCityNames.value = []
 
     try {
-      const results = await Promise.allSettled(cityCatalog.map((city) => fetchCityAirQuality(city)))
+      const results = await Promise.allSettled(majorCities.map((city) => fetchCityAirQuality(city)))
 
       const loaded = []
       const failures = []
@@ -47,7 +52,7 @@ export const useAirQualityStore = defineStore('airQuality', () => {
         if (result.status === 'fulfilled') {
           loaded.push(result.value)
         } else {
-          failures.push({ city: cityCatalog[index], reason: result.reason })
+          failures.push({ city: majorCities[index], reason: result.reason })
         }
       })
 

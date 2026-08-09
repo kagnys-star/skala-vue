@@ -68,6 +68,18 @@ const weatherStore = useWeatherStore()
       </RouterLink>
       <RouterLink
         class="nav-item"
+        :to="{ name: 'movie-list' }"
+      >
+        🎬 영화
+      </RouterLink>
+      <RouterLink
+        class="nav-item"
+        :to="{ name: 'stock-list' }"
+      >
+        📈 주식
+      </RouterLink>
+      <RouterLink
+        class="nav-item"
         :to="{ name: 'weather-about' }"
       >
         ℹ️ 소개

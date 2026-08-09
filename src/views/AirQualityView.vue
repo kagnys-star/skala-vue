@@ -26,6 +26,7 @@ onMounted(() => airStore.ensureLoaded())
         :is-loading="airStore.isLoading"
         :error-message="airStore.errorMessage"
         loading-text="대기질 정보를 불러오는 중입니다..."
+        error-title="대기질 정보를 가져오지 못했습니다"
         @retry="airStore.loadAirQuality"
       />
 
