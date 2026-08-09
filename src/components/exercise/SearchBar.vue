@@ -1,6 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { similarity } from '@/utils/hangulSearch'
+import { useConfigStore } from '@/stores/configStore'
+
+// 추천 목록에도 기온이 보이므로, 목록 카드와 단위가 어긋나지 않도록 같은 스토어를 쓴다.
+const configStore = useConfigStore()
 
 const props = defineProps({
   // 부모가 소유한 검색어. props는 읽기 전용이므로 자식이 직접 바꾸지 않는다.
@@ -66,7 +70,9 @@ const selectSuggestion = (cityName) => {
         <!-- mousedown.prevent: 클릭 순간 input의 blur가 먼저 발생해 목록이 닫히는 것을 막는다 -->
         <button class="suggestion-item" @mousedown.prevent @click="selectSuggestion(city.name)">
           <span class="suggestion-name">{{ city.name }}</span>
-          <span class="suggestion-meta">{{ city.status }} · {{ city.temp }}°C</span>
+          <span class="suggestion-meta">
+            {{ city.status }} · {{ configStore.convertTemp(city.temp) }}{{ configStore.unitSymbol }}
+          </span>
         </button>
       </li>
     </ul>

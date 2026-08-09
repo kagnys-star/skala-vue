@@ -1,7 +1,11 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { findCityById } from '@/data/weatherMockData'
+import { useConfigStore } from '@/stores/configStore'
+
+// 상단 툴바에서 단위를 바꾸면 이 화면의 기온도 같이 바뀌어야 한다.
+const configStore = useConfigStore()
 
 // useRoute: '지금 어떤 URL로 들어왔는지'를 읽는 객체 (params, query 등)
 // useRouter: '다른 곳으로 이동시키는' 객체 (push, back 등)
@@ -11,6 +15,9 @@ const router = useRouter()
 
 // 화면에 뿌릴 도시 객체. 아직 못 찾았을 수도 있으므로 null로 시작한다.
 const cityDetail = ref(null)
+
+// 도시를 못 찾았을 때 접근 오류가 나지 않도록 옵셔널 체이닝으로 감싼다.
+const displayTemp = computed(() => configStore.convertTemp(cityDetail.value?.temp ?? 0))
 
 /**
  * 라우트 파라미터(:cityId)를 실제 도시 객체로 바꿔 담는다.
@@ -56,7 +63,7 @@ const goToHome = () => {
       <dl class="detail-list">
         <div class="detail-row">
           <dt>실시간 기온</dt>
-          <dd>{{ cityDetail.temp }}°C</dd>
+          <dd>{{ displayTemp }}{{ configStore.unitSymbol }}</dd>
         </div>
         <div class="detail-row">
           <dt>기상 현황</dt>

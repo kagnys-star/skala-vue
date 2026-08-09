@@ -2,19 +2,26 @@
 // App은 이제 '껍데기' 역할만 한다.
 // 화면마다 달라지는 내용은 전부 RouterView가 채우므로 여기에는 상태나 로직이 없다.
 import { RouterLink, RouterView } from 'vue-router'
+import UnitToggler from '@/components/exercise/UnitToggler.vue'
 </script>
 
 <template>
   <div class="app-shell">
-    <h1 class="app-title">🌤️ 과제 4: 라우터 적용</h1>
+    <h1 class="app-title">🌤️ 과제 5: 스토어 적용</h1>
 
-    <!-- Navigation Bar -->
-    <nav class="nav-bar">
-      <!-- RouterLink는 최종적으로 <a>로 렌더링되지만, 클릭 시 페이지를 새로 받아오지 않고
-           라우터가 컴포넌트만 교체한다. (SPA의 핵심) -->
-      <RouterLink class="nav-item" :to="{ name: 'weather-home' }">🌤️ 날씨 대시보드</RouterLink>
-      <RouterLink class="nav-item" :to="{ name: 'weather-about' }">ℹ️ 서비스 소개</RouterLink>
-    </nav>
+    <!-- Navigation Bar + 단위 설정 영역 -->
+    <div class="top-bar">
+      <nav class="nav-bar">
+        <!-- RouterLink는 최종적으로 <a>로 렌더링되지만, 클릭 시 페이지를 새로 받아오지 않고
+             라우터가 컴포넌트만 교체한다. (SPA의 핵심) -->
+        <RouterLink class="nav-item" :to="{ name: 'weather-home' }">🌤️ 날씨 대시보드</RouterLink>
+        <RouterLink class="nav-item" :to="{ name: 'weather-about' }">ℹ️ 서비스 소개</RouterLink>
+      </nav>
+
+      <!-- 어느 화면에 있든 항상 보여야 하므로 RouterView 바깥, App에 둔다.
+           단위 값 자체는 스토어에 있으므로 App은 props를 넘겨줄 필요가 없다. -->
+      <UnitToggler />
+    </div>
 
     <!-- 현재 URL에 매칭된 라우트의 컴포넌트가 이 자리에 렌더링된다 -->
     <main class="app-body">
@@ -26,7 +33,8 @@ import { RouterLink, RouterView } from 'vue-router'
 <style scoped>
 .app-shell {
   box-sizing: border-box;
-  width: 460px;
+  /* 상단 바에 내비게이션과 단위 설정이 나란히 들어가야 해서 폭을 늘렸다 */
+  width: 540px;
   padding: 16px;
   background-color: #ffffff;
   border: 1px solid #dcdfe6;
@@ -42,11 +50,16 @@ import { RouterLink, RouterView } from 'vue-router'
   font-size: 18px;
 }
 
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
 .nav-bar {
   display: flex;
-  justify-content: center;
   gap: 8px;
-  margin-bottom: 16px;
 }
 
 .nav-item {

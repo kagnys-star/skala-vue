@@ -9,10 +9,11 @@ import { RouterLink } from 'vue-router'
     <h2 class="about-title">ℹ️ 서비스 소개</h2>
 
     <p class="about-lead">
-      본 앱은 Vue 3와 Vue Router 5를 기반으로 제작된 실습용 가상 관측 대시보드입니다.
+      본 앱은 Vue 3, Vue Router, Pinia를 기반으로 제작된 실습용 가상 관측 대시보드입니다.
     </p>
 
     <ul class="about-list">
+      <li>온도 단위(섭씨/화씨)는 Pinia 스토어가 관리하며, 모든 화면에 즉시 반영됩니다.</li>
       <li><code>components/exercise/</code> 폴더 내부의 독립 부품 컴포넌트를 조합해 화면을 구성합니다.</li>
       <li>클라이언트 사이드 라우팅으로 새로고침 없이 화면이 전환됩니다.</li>
       <li>도시별 상세 관측 정보는 <code>/weather/:cityId</code> 동적 경로로 연결됩니다.</li>
