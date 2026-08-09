@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { similarity } from '@/utils/hangulSearch'
 import { useConfigStore } from '@/stores/configStore'
 
@@ -22,8 +22,24 @@ const props = defineProps({
 // 검색어가 바뀌면 update-query 이벤트로 부모에게 알린다. (실제 상태 변경은 부모가 수행)
 const emit = defineEmits(['update-query'])
 
-// 드롭다운 개폐는 검색창 내부 사정이므로 자식이 직접 갖는다.
-const isOpen = ref(false)
+/**
+ * 드롭다운 UI 상태.
+ *
+ * isOpen(열림 여부)과 highlightedIndex(방향키로 짚은 항목)는 따로 노는 값이 아니라
+ * 닫힐 때·검색어가 바뀔 때 항상 '같이' 초기화되는 한 덩어리다.
+ * ref 두 개로 나누면 두 곳에서 매번 나란히 대입해야 하고, 하나만 리셋을 빠뜨리는
+ * 실수가 생기기 쉽다. reactive로 묶어 두면 close()처럼 한 번의 대입으로 둘 다 리셋된다.
+ */
+const dropdown = reactive({
+  isOpen: false,
+  // -1은 '아무 것도 짚지 않음'을 뜻한다. 0 이상이면 suggestions의 인덱스다.
+  highlightedIndex: -1,
+})
+
+const closeDropdown = () => {
+  dropdown.isOpen = false
+  dropdown.highlightedIndex = -1
+}
 
 // 추천 목록도 검색창의 관심사이므로 자식에서 계산한다.
 const suggestions = computed(() => {
@@ -41,14 +57,42 @@ const suggestions = computed(() => {
     .map((item) => item.city) // 점수는 정렬에만 쓰고 화면에는 도시 정보만 전달
 })
 
+// 검색어가 바뀌어 추천 목록이 달라지면 이전 하이라이트 인덱스는 더 이상 의미가 없다.
+// (예: 3번째를 짚은 채로 글자를 더 치면 목록이 2개로 줄어 인덱스가 범위를 벗어난다)
+watch(suggestions, () => {
+  dropdown.highlightedIndex = -1
+})
+
 const handleInput = (event) => {
   emit('update-query', event.target.value)
-  isOpen.value = true
+  dropdown.isOpen = true
 }
 
 const selectSuggestion = (cityName) => {
   emit('update-query', cityName)
-  isOpen.value = false
+  closeDropdown()
+}
+
+/**
+ * 방향키로 추천 목록을 훑고 Enter로 고른다.
+ * 마우스 없이 검색 → 화살표 → Enter 흐름이 되도록 하는 키보드 접근성 처리다.
+ */
+const handleKeydown = (event) => {
+  if (!dropdown.isOpen || suggestions.value.length === 0) {
+    return
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault() // 커서가 입력창 텍스트 끝으로 이동하는 기본 동작을 막는다
+    dropdown.highlightedIndex = (dropdown.highlightedIndex + 1) % suggestions.value.length
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    const count = suggestions.value.length
+    dropdown.highlightedIndex = (dropdown.highlightedIndex - 1 + count) % count
+  } else if (event.key === 'Enter' && dropdown.highlightedIndex !== -1) {
+    event.preventDefault()
+    selectSuggestion(suggestions.value[dropdown.highlightedIndex].name)
+  }
 }
 </script>
 
@@ -62,27 +106,29 @@ const selectSuggestion = (cityName) => {
       <input
         class="search-input"
         type="search"
-        placeholder="도시 이름을 입력하세요 (예: 부산, ㅂㅅ)"
+        placeholder="도시 이름을 입력하세요 (예: 부산, ㅂㅅ) · ↑↓로 탐색, Enter로 선택"
         :value="query"
         @input="handleInput"
-        @focus="isOpen = true"
-        @blur="isOpen = false"
-        @keyup.esc="isOpen = false"
+        @focus="dropdown.isOpen = true"
+        @blur="closeDropdown"
+        @keydown="handleKeydown"
       >
     </div>
 
     <ul
-      v-if="isOpen && suggestions.length > 0"
+      v-if="dropdown.isOpen && suggestions.length > 0"
       class="suggestion-dropdown"
     >
       <li
-        v-for="city in suggestions"
+        v-for="(city, index) in suggestions"
         :key="city.id"
       >
         <!-- mousedown.prevent: 클릭 순간 input의 blur가 먼저 발생해 목록이 닫히는 것을 막는다 -->
         <button
           class="suggestion-item"
+          :class="{ 'is-highlighted': index === dropdown.highlightedIndex }"
           @mousedown.prevent
+          @mouseenter="dropdown.highlightedIndex = index"
           @click="selectSuggestion(city.name)"
         >
           <span class="suggestion-name">{{ city.name }}</span>
@@ -197,7 +243,8 @@ const selectSuggestion = (cityName) => {
   transition: all var(--ease);
 }
 
-.suggestion-item:hover {
+.suggestion-item:hover,
+.suggestion-item.is-highlighted {
   background-color: var(--accent-soft);
   color: var(--accent);
 }
